@@ -36,10 +36,10 @@ end_height = height - down_side #- 1
 counter = 0
 
 for image in images:
-    # Itereate over the height in 20px steps
-    for i in range(start_height,end_height,20):
-        # Iterate over the width in 20 px steps
-        for j in range(start_width,end_width,20):
+    # Itereate over the height in 160px steps
+    for i in range(start_height,end_height,160):
+        # Iterate over the width in 160 px steps
+        for j in range(start_width,end_width,160):
             cropped_image[:,:,:] = image[i-up_side:i+down_side,j-left_side:j+right_side,:]
             save = path_save + str(counter) + '.png'
             print(save)
