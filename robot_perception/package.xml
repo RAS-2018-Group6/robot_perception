@@ -16,6 +16,8 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>initialize_camera_tools</run_depend>
+  <run_depend>object_detection</run_depend>
+
 
 
 
