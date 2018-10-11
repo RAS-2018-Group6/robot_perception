@@ -4,6 +4,7 @@ import numpy as np
 import glob
 import random
 from sklearn import svm
+import pickle
 #### Script to train the SVM ####
 
 def loadImages(path):
@@ -21,21 +22,21 @@ path_non_objects =  '/home/ras/robot_images/clipped_non_objects/'
 
 images_objects = loadImages(path_objects)
 random.shuffle(images_objects)
-train_images_object = images_objects[0:50]
-test_images_object = images_objects[50:]
+train_images_object = images_objects[0:90]
+test_images_object = images_objects[90:]
 
-cv2.imshow("display",test_images_object[0])
-cv2.waitKey(0)
-cv2.imshow("display",test_images_object[1])
-cv2.waitKey(0)
+#cv2.imshow("display",test_images_object[0])
+#cv2.waitKey(0)
+#cv2.imshow("display",test_images_object[1])
+#cv2.waitKey(0)
 label_train_obj = np.ones(len(train_images_object)).tolist()
 label_test_obj = np.ones(len(test_images_object)).tolist()
 
 images_non_objects = loadImages(path_non_objects)
 random.shuffle(images_non_objects)
-train_images_non_object = images_non_objects[0:50]
+train_images_non_object = images_non_objects[0:90]
 
-test_images_non_object = images_non_objects[58:63]
+test_images_non_object = images_non_objects[100:105]
 label_train_non_obj = (np.ones(len(train_images_non_object)) * (-1)).tolist()
 label_test_non_obj = (np.zeros(len(train_images_non_object)) * (-1)).tolist()
 
@@ -54,12 +55,12 @@ label_test = label_test_obj + label_test_non_obj
 hog = cv2.HOGDescriptor()
 
 features = []
-print('pass')
+#print('pass')
 for image in train_images:
     feature = hog.compute(image)
     feature = feature.ravel()
     features.append(feature)
-print(features[0])
+#print(features[0])
 #Shuffle the data for training
 perm = list(zip(features,label_train))
 random.shuffle(perm)
@@ -71,9 +72,14 @@ features, label_train = zip(*perm)
 obj_svm = svm.SVC()
 obj_svm.fit(features, label_train)
 
+filename = 'object_detection_svm.sav'
+pickle.dump(obj_svm, open(filename,'wb'))
+
+load_obj_svm = pickle.load(open(filename,'rb'))
+
 #Testing the SVM
 for image in test_images:
     feature = hog.compute(image)
     feature = (feature.ravel()).reshape(1,-1)
-    result = obj_svm.predict(feature)
+    result = load_obj_svm.predict(feature)
     print(result)

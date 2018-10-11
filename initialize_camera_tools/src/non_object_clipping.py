@@ -10,8 +10,8 @@ def loadImages(path):
     return images
 
 
-path = '/home/ras/robot_images/non_object_images'
-path_save =  '/home/ras/robot_images/clipped_non_objects/cropped_image_'
+path = '/home/ras/robot_images/images'
+path_save =  '/home/ras/robot_images/clipped_objects_2/cropped_image_'
 
 images = loadImages(path)
 height = (images[0].shape)[0]
