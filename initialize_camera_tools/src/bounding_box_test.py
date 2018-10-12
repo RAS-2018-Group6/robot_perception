@@ -14,8 +14,8 @@ def loadImages(path):
 path = '/home/ras/robot_images/images'
 
 # define the lower and upper boundaries of the colors in the HSV color space
-lower = {'red':(160, 90, 110), 'green':(57, 120, 50), 'blue':(95, 100, 140), 'yellow':(14, 56, 110), 'orange':(0, 110, 160), 'purple':(105,48,30)}
-upper = {'red':(180,255,255), 'green':(82,255,255), 'blue':(113,255,255), 'yellow':(25,255,255), 'orange':(20,255,255), 'purple':(150,255,255)}
+lower = {'red':(0, 169, 84), 'green':(37, 150, 100), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(110,32,81)}
+upper = {'red':(8,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(174,126,185)}
 
 colors = {'red':(0,0,255), 'green':(0,255,0), 'blue':(255,0,0), 'yellow':(0, 255, 217), 'orange':(0,140,255), 'purple':(210,255,128)}
 

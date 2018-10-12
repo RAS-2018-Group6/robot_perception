@@ -6,13 +6,17 @@ import glob
 
 def loadImages(path):
     # Return an array of images localized at the given path
-    images = [cv2.imread(file) for file in glob.glob(path + '/*jpg')]
+    filenames = [ name for name in glob.glob(path + '/*png')]
+    filenames.sort()
+    print(filenames)
+    images = [cv2.imread(file) for file in filenames]
     return images
 
 
-path = '/home/ras/robot_images/hsv_data'
+path = '/home/ras/robot_images/hsv_clipped_objects'
 
 images = loadImages(path)
+print(images)
 
 for image in images:
     print('New Object!')
