@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import rospy
 from rospy.numpy_msg import numpy_msg
+import sensor_msgs.point_cloud2 as pc2
 from sensor_msgs.msg import Image, PointCloud2
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose,PointStamped
 import cv2
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
@@ -15,7 +16,7 @@ import struct
 class object_detection:
     def __init__(self):
         self.pos_msg = Pose()
-        self.pos_pub = rospy.Publisher('/object_detection/object_position',Pose,queue_size = 1)
+        self.pos_pub = rospy.Publisher('/object_detection/object_position',PointStamped,queue_size = 1)
         self.clipped_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publishes the clipped image to the object clasification
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
@@ -96,34 +97,57 @@ class object_detection:
                 print(e)
 
             # Calculate the 3D position
-            if positions:
-                pose_3D = self.calculate3DPositions(positions)
-                rospy.loginfo(pose_3D)
-                if(pose_3D):
-                    pose = Pose()
-                    pose.position.x = pose_3D[0]
-                    pose.position.y = pose_3D[1]
-                    pose.position.z = pose_3D[2]
+            if self.pc_bool:
+                if positions:
+                    pose_3D = self.calculate3DPositions(positions)
+                    rospy.loginfo(pose_3D)
+                    if(pose_3D):
+                        pose = PointStamped()
+                        pose.header.frame_id = 'camera_depth_frame'
+                        pose.point.x = pose_3D[0]
+                        pose.point.y = pose_3D[1]
+                        pose.point.z = pose_3D[2]
 
-                    self.pos_pub.publish(pose)
+                        self.pos_pub.publish(pose)
+                        rospy.loginfo('Published')
+            else:
+                rospy.loginfo('No PointCloud data available')
 
     def calculate3DPositions(self,positions):
-        pc_width = self.point_cloud.width
-        pc_height = self.point_cloud.height
-        pose_3D = [0,0,0]
+        pose_3D = []
         if self.pc_bool:
+            self.pc_bool = False
+            pc_width = self.point_cloud.width
+            pc_height = self.point_cloud.height
             for position in positions:
-                uv = [[position[0],position[1]]]
-                
-                for point in sensor_msgs.point_cloud2.read_points(positions, skip_nans = True, uvs = uv):
-                    pose_3D[0] = point[0]
-                    pose_3D[1] = point[1]
-                    pose_3D[2] = point[2]
+                # Create acces points
+                uv = [[u,v] for u in range(position[0],position[0]+position[2],5) for v in range(position[1],position[1]+position[3],5)]
+                #rospy.loginfo(uv)
+                pose_3D = [0,0,0]
+                counter_x = 0
+                counter_y = 0
+                counter_z = 0
+                for point in pc2.read_points(self.point_cloud, skip_nans = True, uvs = uv):
+                    if point[0] != 0:
+                        pose_3D[0] += point[0]
+                        counter_x += 1
+                    if point[1] != 0:
+                        pose_3D[1] += point[1]
+                        counter_y += 1
+                    if point[2] != 0:
+                        pose_3D[2] += point[2]
+                        counter_z += 1
+                if counter_x != 0 and counter_y != 0 and counter_z != 0:
+                    pose_3D[0] = pose_3D[0]/counter_x
+                    pose_3D[1] = pose_3D[1]/counter_y
+                    pose_3D[2] = pose_3D[2]/counter_z
 
         return pose_3D
 
     def callback_pointcloud(self,msg):
+        #rospy.loginfo(msg._type)
         self.point_cloud = msg
+
         self.pc_bool = True
 
     def detect_objects(self):
@@ -131,7 +155,7 @@ class object_detection:
         rospy.Subscriber('/camera/rgb/image_rect_color',Image,self.callback_image,queue_size=1)
         rospy.Subscriber('camera/depth_registered/points',PointCloud2,self.callback_pointcloud,queue_size=1)
 
-        rate = rospy.Rate(10) #HZ
+        rate = rospy.Rate(1) #HZ
         while not rospy.is_shutdown():
             rate.sleep()
 
