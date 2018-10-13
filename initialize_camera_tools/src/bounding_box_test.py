@@ -20,13 +20,18 @@ upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow
 colors = {'red':(0,0,255), 'green':(0,255,0), 'blue':(255,0,0), 'yellow':(0, 255, 217), 'orange':(0,140,255), 'purple':(210,255,128)}
 
 images = loadImages(path)
+#print(images)
 
 for image in images:
     print('New Image')
+    print(image)
+
     #image = cv2.resize(image,(0,0),fx = 0.25,fy = 0.25)
     start = time.time()
     # Blur image
     blurred_image = cv2.GaussianBlur(image,(11,11),0)
+    print('Blurred')
+    print(blurred_image)
     hsv = cv2.cvtColor(blurred_image,cv2.COLOR_BGR2HSV)
     for key,value in upper.items():
 
