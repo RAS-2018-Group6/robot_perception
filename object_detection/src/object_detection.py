@@ -65,7 +65,8 @@ class object_detection:
                 # Only draw bounding boxes that have a goodsize
                 area = w * h
                 if area >= 4000 and area <= 35000:
-                    positions = [[x,y,w,h]]
+                    if key == 'blue':
+                        positions = [[x,y,w,h]]
                     cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
                     found = True
                     #rospy.loginfo(image)
@@ -95,38 +96,29 @@ class object_detection:
                 print(e)
 
             # Calculate the 3D position
-            pose_3D = self.calculate3DPositions(positions)
-            rospy.loginfo(pose_3D)
-            if(pose_3D):
-                pose = Pose()
-                pose.position.x = pose_3D[0]
-                pose.position.y = pose_3D[1]
-                pose.position.z = pose_3D[2]
+            if positions:
+                pose_3D = self.calculate3DPositions(positions)
+                rospy.loginfo(pose_3D)
+                if(pose_3D):
+                    pose = Pose()
+                    pose.position.x = pose_3D[0]
+                    pose.position.y = pose_3D[1]
+                    pose.position.z = pose_3D[2]
 
-                self.pos_pub.publish(pose)
+                    self.pos_pub.publish(pose)
 
     def calculate3DPositions(self,positions):
         pc_width = self.point_cloud.width
         pc_height = self.point_cloud.height
-        pose_3D = []
+        pose_3D = [0,0,0]
         if self.pc_bool:
             for position in positions:
-                # Getting starting position for the array, according to the x = position[0],y = position[1] coordinate in the RGB image
-                arrayPosition = position[1] * self.point_cloud.row_step + position[0] * self.point_cloud.point_step
-                bytesX = [ord(x) for x in self.point_cloud.data[arrayPosition:arrayPosition+4]]
-                bytesY = [ord(x) for x in self.point_cloud.data[arrayPosition+4: arrayPosition+8]]
-                bytesZ = [ord(x) for x in self.point_cloud.data[arrayPosition+8:arrayPosition+12]]
-
-                byte_format=struct.pack('4B', *bytesX)
-                X = struct.unpack('f', byte_format)[0]
-
-                byte_format=struct.pack('4B', *bytesY)
-                Y = struct.unpack('f', byte_format)[0]
-
-                byte_format=struct.pack('4B', *bytesZ)
-                Z = struct.unpack('f', byte_format)[0]
-
-                pose_3D = [X,Y,Z]
+                uv = [[position[0],position[1]]]
+                
+                for point in sensor_msgs.point_cloud2.read_points(positions, skip_nans = True, uvs = uv):
+                    pose_3D[0] = point[0]
+                    pose_3D[1] = point[1]
+                    pose_3D[2] = point[2]
 
         return pose_3D
 
