@@ -6,6 +6,7 @@ from geometry_msgs.msg import Pose
 import cv2
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
+import struct
 
 
 
@@ -95,14 +96,14 @@ class object_detection:
 
             # Calculate the 3D position
             pose_3D = self.calculate3DPositions(positions)
-
+            rospy.loginfo(pose_3D)
             if(pose_3D):
                 pose = Pose()
                 pose.position.x = pose_3D[0]
                 pose.position.y = pose_3D[1]
                 pose.position.z = pose_3D[2]
 
-                self.pose_pub.publish(pose)
+                self.pos_pub.publish(pose)
 
     def calculate3DPositions(self,positions):
         pc_width = self.point_cloud.width
@@ -111,10 +112,10 @@ class object_detection:
         if self.pc_bool:
             for position in positions:
                 # Getting starting position for the array, according to the x = position[0],y = position[1] coordinate in the RGB image
-                arrayPosition = position[1] * self.point_cloud.row_step + position[0] * self.point_cloud.step
-                bytesX = [ord(x) for x in cloud.data[array_pos:array_pos+4]]
-                bytesY = [ord(x) for x in cloud.data[array_pos+4: array_pos+8]]
-                bytesZ = [ord(x) for x in cloud.data[array_pos+8:array_pos+12]]
+                arrayPosition = position[1] * self.point_cloud.row_step + position[0] * self.point_cloud.point_step
+                bytesX = [ord(x) for x in self.point_cloud.data[arrayPosition:arrayPosition+4]]
+                bytesY = [ord(x) for x in self.point_cloud.data[arrayPosition+4: arrayPosition+8]]
+                bytesZ = [ord(x) for x in self.point_cloud.data[arrayPosition+8:arrayPosition+12]]
 
                 byte_format=struct.pack('4B', *bytesX)
                 X = struct.unpack('f', byte_format)[0]
