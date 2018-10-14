@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 import struct
+import tf
 
 
 
@@ -16,13 +17,14 @@ import struct
 class object_detection:
     def __init__(self):
         self.pos_msg = Pose()
-        self.pos_pub = rospy.Publisher('/object_detection/object_position',PointStamped,queue_size = 1)
+        self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
         self.clipped_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publishes the clipped image to the object clasification
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
         self.colors = {'red':(0,0,255), 'green':(0,255,0), 'blue':(255,0,0), 'yellow':(0, 255, 217), 'orange':(0,140,255), 'purple':(210,255,128)}
 
+        self.tf_listener = tf.TransformListener()
         self.pc_bool = False
         self.bridge = CvBridge()
 
@@ -100,16 +102,21 @@ class object_detection:
             if self.pc_bool:
                 if positions:
                     pose_3D = self.calculate3DPositions(positions)
-                    rospy.loginfo(pose_3D)
+                    #rospy.loginfo(pose_3D)
                     if(pose_3D):
                         pose = PointStamped()
-                        pose.header.frame_id = 'camera_depth_frame'
-                        pose.point.x = pose_3D[0]
-                        pose.point.y = pose_3D[1]
-                        pose.point.z = pose_3D[2]
+                        time = self.tf_listener.getLatestCommonTime("/map","/camera_link")
+                        pose.header.frame_id = 'camera_link'
+                        pose.point.x = pose_3D[2] #Robot X = Camera Z
+                        pose.point.y = -pose_3D[0] #Robot Y = Camera X
+                        pose.point.z = 0 #Robot Z = Camera Y, set to zero because we do not want to have height, assume straight downward projection on the x,y plane
 
-                        self.pos_pub.publish(pose)
+                        pose_in_map = self.tf_listener.transformPoint("/map",pose)
+                        pose_in_map.point.z = 0
+                        rospy.loginfo(pose_in_map)
+                        self.pos_pub.publish(pose_in_map)
                         rospy.loginfo('Published')
+
             else:
                 rospy.loginfo('No PointCloud data available')
 
@@ -155,7 +162,7 @@ class object_detection:
         rospy.Subscriber('/camera/rgb/image_rect_color',Image,self.callback_image,queue_size=1)
         rospy.Subscriber('camera/depth_registered/points',PointCloud2,self.callback_pointcloud,queue_size=1)
 
-        rate = rospy.Rate(1) #HZ
+        rate = rospy.Rate(10) #HZ
         while not rospy.is_shutdown():
             rate.sleep()
 
