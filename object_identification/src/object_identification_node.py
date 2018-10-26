@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import rospy
+from std_msgs import String
+from ras_msgs import RAS_Evidence
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose,PointStamped
 import cv2
@@ -13,12 +15,25 @@ from cv_bridge import CvBridge, CvBridgeError
 
 class ObjectIdentificationNode:
     def __init__(self):
-        
-        self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
-        self.clipped_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publishes the clipped image to the object clasification
+
+        self.sound_msgs = {'an_object': 'I see an object','yellow_cube': 'I see a yellow cube','yellow_ball': 'I see a yellow ball',
+                            'green_cube':'I see a green cube', 'green_cylinder':'I see a green cylinder','green_hollow_cube':'I see a green hollow cube',
+                            'orange_cross':'I see an orange cross', 'patric':'I see Patric',
+                            'red_cylinder':'I see a red cylinder','red_hollow_cube':'I see a red hollow cube','red_ball':'I see a red ball',
+                            'blue_cube':'I see a blue cube', 'blue_triangle':'I see a blue triangle',
+                            'pruple_cross':'I see a purple cross', 'purple_star': 'I see a purple star'}
+
+        self.sound_msg = String()
+        sound_msg.data = self.sound_msgs['an_object']
+        self.sound_pub = rospy.Publisher('/espeak/string',String,queue_size = 1)
+        self.evidence_msg = RAS_Evidence()
+        self.evidence_pub = rospy.Publisher('/evidence',RAS_Evidence,queue_size = 1)
 
         self.bridge = CvBridge()
 
+    def evaluate_image(self,image):
+        #TODO: Load the trained neural network model and set according to the result the right values for the evidence message and sound message
+        return result
 
     def callback_image(self,msg):
         try:
@@ -27,43 +42,13 @@ class ObjectIdentificationNode:
             print(e)
 
 
-        found, positions, clipped_image = self.scanImage(cv_image)
+        result = self.evaluate_image(cv_image)
         #print(clipped_image)
-
-        if found:
-            try:
-                self.clipped_image_pub.publish(self.bridge.cv2_to_imgmsg(clipped_image, "bgr8"))
-
-            except CvBridgeError as e:
-                print(e)
-
-            # Calculate the 3D position
-            if self.pc_bool:
-                if positions:
-                    pose_3D = self.calculate3DPositions(positions)
-                    #rospy.loginfo(pose_3D)
-                    if(pose_3D):
-                        pose = PointStamped()
-                        time = self.tf_listener.getLatestCommonTime("/map","/camera_link")
-                        pose.header.frame_id = 'camera_link'
-                        pose.point.x = pose_3D[2] #Robot X = Camera Z
-                        pose.point.y = -pose_3D[0] #Robot Y = Camera X
-                        pose.point.z = 0 #Robot Z = Camera Y, set to zero because we do not want to have height, assume straight downward projection on the x,y plane
-
-                        pose_in_map = self.tf_listener.transformPoint("/map",pose)
-                        pose_in_map.point.z = 0
-                        rospy.loginfo(pose_in_map)
-                        self.pos_pub.publish(pose_in_map)
-                        rospy.loginfo('Published')
-
-            else:
-                rospy.loginfo('No PointCloud data available')
-
 
 
     def identify_object(self):
         rospy.init_node('identify_object')
-        rospy.Subscriber('/camera/rgb/image_rect_color',Image,self.callback_image,queue_size=1)
+        rospy.Subscriber('object_detection/clipped_image',Image,self.callback_image,queue_size=1)
 
 
         rate = rospy.Rate(10) #HZ
