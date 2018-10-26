@@ -18,7 +18,8 @@ class object_detection:
     def __init__(self):
         self.pos_msg = Pose()
         self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
-        self.clipped_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publishes the clipped image to the object clasification
+        self.bounding_box_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publish the image with the bounding box drawn
+        self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
@@ -76,9 +77,10 @@ class object_detection:
 
         cv2.imshow('display',image)
         cv2.waitKey(1)
-        clipped_image = image
+        clipped_image = image[y:y+h,x:x+w]
+        bounding_image = image
 
-        return found,positions,clipped_image
+        return found,positions,clipped_image,bounding_image
 
 
     def callback_image(self,msg):
@@ -88,12 +90,13 @@ class object_detection:
             print(e)
 
 
-        found, positions, clipped_image = self.scanImage(cv_image)
+        found, positions, clipped_image, bounding_image = self.scanImage(cv_image)
         #print(clipped_image)
 
         if found:
             try:
                 self.clipped_image_pub.publish(self.bridge.cv2_to_imgmsg(clipped_image, "bgr8"))
+                self.bounding_box_image_pub.publish(self.bridge.cv2_to_imgmsg(bounding_image, "bgr8"))
 
             except CvBridgeError as e:
                 print(e)
