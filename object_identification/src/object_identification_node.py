@@ -16,15 +16,16 @@ from cv_bridge import CvBridge, CvBridgeError
 class ObjectIdentificationNode:
     def __init__(self):
 
-        self.sound_msgs = {'an_object': 'I see an object','yellow_cube': 'I see a yellow cube','yellow_ball': 'I see a yellow ball',
-                            'green_cube':'I see a green cube', 'green_cylinder':'I see a green cylinder','green_hollow_cube':'I see a green hollow cube',
-                            'orange_cross':'I see an orange cross', 'patric':'I see Patric',
-                            'red_cylinder':'I see a red cylinder','red_hollow_cube':'I see a red hollow cube','red_ball':'I see a red ball',
-                            'blue_cube':'I see a blue cube', 'blue_triangle':'I see a blue triangle',
-                            'pruple_cross':'I see a purple cross', 'purple_star': 'I see a purple star'}
+        #possible event [0] and sound [1] messages
+        self.result_msgs = {0:['an_object','I see an object'], 1:['yellow_cube','I see a yellow cube'], 2:['yellow_ball','I see a yellow ball'],
+                            3:['green_cube','I see a green cube'], 4:['green_cylinder','I see a green cylinder'],5:['green_hollow_cube','I see a green hollow cube'],
+                            6:['orange_cross','I see an orange cross'], 7:['patric','I see Patric'],
+                            8:['red_cylinder','I see a red cylinder'],9:['red_hollow_cube','I see a red hollow cube'], 10: ['red_ball','I see a red ball'],
+                            11:['blue_cube','I see a blue cube'], 12:['blue_triangle','I see a blue triangle'],
+                            13:['pruple_cross','I see a purple cross'], 14:['purple_star','I see a purple star']}
 
         self.sound_msg = String()
-        sound_msg.data = self.sound_msgs['an_object']
+        self.sound_msg.data = self.result_msgs[0][1]
         self.sound_pub = rospy.Publisher('/espeak/string',String,queue_size = 1)
         self.evidence_msg = RAS_Evidence()
         self.evidence_pub = rospy.Publisher('/evidence',RAS_Evidence,queue_size = 1)
@@ -33,6 +34,7 @@ class ObjectIdentificationNode:
 
     def evaluate_image(self,image):
         #TODO: Load the trained neural network model and set according to the result the right values for the evidence message and sound message
+        result = None
         return result
 
     def callback_image(self,msg):
@@ -43,7 +45,13 @@ class ObjectIdentificationNode:
 
 
         result = self.evaluate_image(cv_image)
-        #print(clipped_image)
+
+        if result is not None:
+            self.sound_msg.data = self.result_msgs[result][1]
+            self.sound_pub.publish(sel.sound_msg)
+            #Set up evidence msg 
+
+
 
 
     def identify_object(self):
