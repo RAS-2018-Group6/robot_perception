@@ -3,7 +3,7 @@ import rospy
 from std_msgs import String
 from ras_msgs import RAS_Evidence
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Pose,PointStamped
+from geometry_msgs.msg import Pose,PointStamped, TransformStamped
 import cv2
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
@@ -28,6 +28,10 @@ class ObjectIdentificationNode:
         self.sound_msg.data = self.result_msgs[0][1]
         self.sound_pub = rospy.Publisher('/espeak/string',String,queue_size = 1)
         self.evidence_msg = RAS_Evidence()
+        self.evidence_msg.group_number = 6
+        self.evidence_msg.object_id = self.result_msgs[0][0]
+        self.transform_msg = TransformStamped()
+        self.evidence_msg.object_location = self.transform_msg
         self.evidence_pub = rospy.Publisher('/evidence',RAS_Evidence,queue_size = 1)
 
         self.bridge = CvBridge()
@@ -47,16 +51,30 @@ class ObjectIdentificationNode:
         result = self.evaluate_image(cv_image)
 
         if result is not None:
+            # Set the output string for the sound message and publish it.
             self.sound_msg.data = self.result_msgs[result][1]
             self.sound_pub.publish(sel.sound_msg)
-            #Set up evidence msg 
+            #Set up evidence msg and publish it
+            self.evidence_msg.time = rospy.get_time()
+            self.evidence_msg.image_evidence = self.bridge.cv2_to_imgmsg(cv_image, "bgr8")
+            self.evidence_msg.object_id = self.result_msgs[result][0]
+            self.evidence_msg.object_location = self.transform_msg
+            self.evidence_pub.publish(self.evidence_msg)
 
+
+    def callback_foundObject(self,point):
+        # Receive the Point of the found object and write to the TransformStamped message for publishing later
+        self.transform_msg.translation.x = point.point.x
+        self.transform_msg.translation.y = point.point.y
+        self.transform_msg.translation.z = point.point.z
 
 
 
     def identify_object(self):
         rospy.init_node('identify_object')
-        rospy.Subscriber('object_detection/clipped_image',Image,self.callback_image,queue_size=1)
+        rospy.Subscriber('/found_object',PointStamped,self.callback_foundObject,queue_size = 1)
+        rospy.Subscriber('object_detection/clipped_image',Image,self.callback_image,queue_size = 1)
+
 
 
         rate = rospy.Rate(10) #HZ
