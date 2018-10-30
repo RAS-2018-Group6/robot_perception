@@ -8,12 +8,13 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard,
 
 
 #Set global variables
-train_img_path = '/home/ras/robot_images/test'
-validation_img_path = 'path_to_val'
+train_img_path = "/content/drive/My Drive/ras/train_images"
+validation_img_path = "/content/drive/My Drive/ras/validation_images"
+model_save = "/content/drive/My Drive/ras/vgg16_1.h5"
 img_width = 224
 img_height = 224
-n_train_samples = 16
-n_validation_samples = 0
+n_train_samples = 9
+n_validation_samples = 7
 batch_size = 16
 epochs = 50
 
@@ -28,10 +29,10 @@ x = model.output
 x = Flatten()(x)
 x = Dense(256,activation='relu')(x)
 x = Dropout(0.5)(x)
-predictions = Dense(1,activation='sigmoid')(x)
+predictions = Dense(2,activation='sigmoid')(x)
 #Create final model
 model_final = Model(input = model.input, output = predictions)
-model_final.compile(loss = "binary_crossentropy", optimizer = 'rmsprop', metrics=["accuracy"])
+model_final.compile(loss = "categorical_crossentropy", optimizer = 'rmsprop', metrics=["accuracy"])
 
 #Load the data
 train_datagen = ImageDataGenerator(rescale = 1./255,
@@ -55,12 +56,14 @@ validation_generator = train_datagen.flow_from_directory(
                     class_mode = "categorical")
 
 # Train the model
-checkpoint = ModelCheckpoint("vgg16_1.h5", monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+checkpoint = ModelCheckpoint(model_save, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=1)
 early = EarlyStopping(monitor='val_acc', min_delta=0, patience=10, verbose=1, mode='auto')
+print('Start Training')
+model_final.summary()
 model_final.fit_generator(train_generator,
-                        samples_per_epoch = n_train_samples,
+                        steps_per_epoch = 2000 //batch_size,
                         epochs = epochs,
                         validation_data = validation_generator,
-                        nb_val_samples = n_validation_samples,
+                        validation_steps = 800 // batch_size,
                         callbacks = [checkpoint,early])
 print('Done')
