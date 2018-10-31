@@ -16,17 +16,14 @@ import tf
 
 class object_detection_save:
     def __init__(self):
-        self.pos_msg = Pose()
-        self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
-        self.bounding_box_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publish the image with the bounding box drawn
-        self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
+
+
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
         self.colors = {'red':(0,0,255), 'green':(0,255,0), 'blue':(255,0,0), 'yellow':(0, 255, 217), 'orange':(0,140,255), 'purple':(210,255,128)}
+        self.counter = 0
 
-        self.tf_listener = tf.TransformListener()
-        self.pc_bool = False
         self.bridge = CvBridge()
 
     # Transforms an 1D-BGR array (3*height*width) to an 3D-RGB array (height,width,3)
@@ -52,32 +49,32 @@ class object_detection_save:
         hsv = cv2.cvtColor(blurred_image,cv2.COLOR_BGR2HSV)
         positions = []
         for key,value in self.upper.items():
-            # Mask the image and use open/close to have smoother conturs
-            kernel = np.ones((9,9),np.uint8)
-            mask = cv2.inRange(hsv,self.lower[key],self.upper[key])
-            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+            if key == 'red':
+                # Mask the image and use open/close to have smoother conturs
+                kernel = np.ones((9,9),np.uint8)
+                mask = cv2.inRange(hsv,self.lower[key],self.upper[key])
+                mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+                mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
-            # Find contours and initialize center (x,y) of the object
-            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
-            center = None
+                # Find contours and initialize center (x,y) of the object
+                cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
+                center = None
 
-            if len(cnts)>0:
-                # Find biggest contur:
-                c = max(cnts,key = cv2.contourArea)
-                x,y,w,h = cv2.boundingRect(c)
-                # Only draw bounding boxes that have a goodsize
-                area = w * h
-                if area >= 4000 and area <= 35000:
-                    if key == 'blue':
-                        positions = [[x,y,w,h]]
-                    cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
-                    found = True
-                    #rospy.loginfo(image)
+                if len(cnts)>0:
+                    # Find biggest contur:
+                    c = max(cnts,key = cv2.contourArea)
+                    x,y,w,h = cv2.boundingRect(c)
+                    # Only draw bounding boxes that have a goodsize
+                    area = w * h
+                    if area >= 4000 and area <= 35000:
+                        #cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
+                        found = True
+                        clipped_image = image[y:y+h,x:x+w]
+                        #rospy.loginfo(image)
 
         cv2.imshow('display',image)
         cv2.waitKey(1)
-        clipped_image = image[y:y+h,x:x+w]
+
         bounding_image = image
 
         return found,positions,clipped_image,bounding_image
@@ -92,9 +89,10 @@ class object_detection_save:
 
         found, positions, clipped_image, bounding_image = self.scanImage(cv_image)
         #print(clipped_image)
-        path = 'path'
-        save_path = path + 'yellow_cube_' + str(counter) + '.png'
-        cv2.imwrite()
+        path = '/home/ras16/dataset/red_ball/'
+        save_path = path + 'red_ball_' + str(self.counter) + '.png'
+        self.counter += 1
+        cv2.imwrite(save_path,clipped_image)
 
             # Calculate the 3D position
 
