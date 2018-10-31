@@ -21,7 +21,7 @@ epochs = 50
 #Setup Network model
 model = applications.VGG16(include_top = False, weights='imagenet', input_shape = (img_width,img_height,3))
 
-for layer in model.layers[:5]:
+for layer in model.layers:
     layer.trainable = False     #Freeze First 5 layers
 
 #Add custom layers
@@ -29,7 +29,7 @@ x = model.output
 x = Flatten()(x)
 x = Dense(256,activation='relu')(x)
 x = Dropout(0.5)(x)
-predictions = Dense(2,activation='sigmoid')(x)
+predictions = Dense(2,activation='softmax')(x)
 #Create final model
 model_final = Model(input = model.input, output = predictions)
 model_final.compile(loss = "categorical_crossentropy", optimizer = 'rmsprop', metrics=["accuracy"])
