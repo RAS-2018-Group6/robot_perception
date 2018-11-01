@@ -68,6 +68,15 @@ class object_detection:
                 x,y,w,h = cv2.boundingRect(c)
                 # Only draw bounding boxes that have a goodsize
                 area = w * h
+                x = x - 20
+                y = y - 20
+                w = w + 40
+                h = h + 40
+
+                if x < 0 or y < 0:
+                    x = 0
+                    y = 0
+
                 if area >= 4000 and area <= 35000:
                     if key == 'blue':
                         positions = [[x,y,w,h]]

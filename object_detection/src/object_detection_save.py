@@ -49,7 +49,7 @@ class object_detection_save:
         hsv = cv2.cvtColor(blurred_image,cv2.COLOR_BGR2HSV)
         positions = []
         for key,value in self.upper.items():
-            if key == 'red':
+            if key == 'purple':
                 # Mask the image and use open/close to have smoother conturs
                 kernel = np.ones((9,9),np.uint8)
                 mask = cv2.inRange(hsv,self.lower[key],self.upper[key])
@@ -66,10 +66,25 @@ class object_detection_save:
                     x,y,w,h = cv2.boundingRect(c)
                     # Only draw bounding boxes that have a goodsize
                     area = w * h
+
+                    x = x - 20
+                    y = y - 20
+                    w = w + 40
+                    h = h + 40
+
+                    if x < 0 or y < 0:
+                        x = 0
+                        y = 0
+
                     if area >= 4000 and area <= 35000:
                         #cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
                         found = True
                         clipped_image = image[y:y+h,x:x+w]
+                        path = '/home/ras16/dataset/purple_cross/'
+                        save_path = path + 'purple_cross_' + str(self.counter) + '.png'
+                        self.counter += 1
+                        cv2.imwrite(save_path,clipped_image)
+                        cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
                         #rospy.loginfo(image)
 
         cv2.imshow('display',image)
@@ -89,10 +104,7 @@ class object_detection_save:
 
         found, positions, clipped_image, bounding_image = self.scanImage(cv_image)
         #print(clipped_image)
-        path = '/home/ras16/dataset/red_ball/'
-        save_path = path + 'red_ball_' + str(self.counter) + '.png'
-        self.counter += 1
-        cv2.imwrite(save_path,clipped_image)
+
 
             # Calculate the 3D position
 
