@@ -10,19 +10,22 @@ import matplotlib.pyplot as plt
 import time
 
 
-model = load_model('vgg16_1.h5')
+model = load_model('/home/ras/test_data/my_network.h5')
 print('Model loaded')
-img = image.load_img('purple_star_1.png', target_size = (224,224))
-print(type(img))
 
-x = image.img_to_array(img)
-x = x.reshape((1,)+x.shape  )
-#print(type(x))
-#print(x.shape)
+test_img_path = '/home/ras/test_data/'
 
-#plt.imshow(x/255.)
-#plt.savefig('test.pdf')
-start_time = time.time()
-y = model.predict(x)
-print(y)
-print(time.time()-start_time)
+test_datagen = ImageDataGenerator(rescale = 1./255)
+
+test_generator = test_datagen.flow_from_directory(
+                    test_img_path,
+                    target_size = (224,224),
+                    batch_size = 1,
+                    class_mode = "categorical",
+                    shuffle = False)
+
+predicts = model.predict_generator(test_generator,steps = 70)
+
+for predict in predicts:
+    max_idx = np.argmax(predict)
+    print('Class: '+ str(max_idx))
