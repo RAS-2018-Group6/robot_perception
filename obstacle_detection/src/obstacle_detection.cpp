@@ -25,7 +25,7 @@ public:
         range_ = 0.1;
         point_counter_ = 0;
         point_threshold_ = 20;
-        squared_radius_ = std::pow(0.15,2);
+        squared_radius_ = std::pow(0.3,2);
 
 
         avg_obstacle_x_ = 0.0;
@@ -48,7 +48,7 @@ public:
         tf::StampedTransform transform;
         try
         {
-            tf_listener_.lookupTransform("/map", msg->header.frame_id, ros::Time(0), transform);
+            tf_listener_.lookupTransform("/map",msg->header.frame_id, ros::Time(0), transform);
             ROS_INFO("Waiting for Transform");
         }
         catch (tf::TransformException ex)
@@ -66,7 +66,7 @@ public:
           //Remove points with value NAN
           if(!std::isnan(it->x)){
               //Check only the point in the right height range: dist_from_floor_ -> dist_from_floor_ + range_
-              ROS_INFO("Height:%f",it->z);
+              //ROS_INFO("Height:%f",it->z);
               if(it->z >= dist_from_floor_ && it->z < dist_from_floor_ + range_){
                   //Check if point is in stopping radius_
                   if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
