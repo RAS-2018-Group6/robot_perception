@@ -25,8 +25,8 @@ class ObjectIdentificationNode:
         #                    11:['blue_cube','I see a blue cube'], 12:['blue_triangle','I see a blue triangle'],
         #                    13:['pruple_cross','I see a purple cross'], 14:['purple_star','I see a purple star']}
 
-        self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],2:['patric','I see Patric'],
-                            3:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
+        self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],3:['patric','I see Patric'],
+                            2:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
 
         self.sound_msg = String()
         self.sound_msg.data = self.result_msgs[6][1]
@@ -42,7 +42,7 @@ class ObjectIdentificationNode:
 
         self.frame_skipper = 0
 
-        self.model = load_model('/home/ras16/networks/my_network.h5')
+        self.model = load_model('/home/ras16/networks/my_network_less_yellow.h5')
         self.model.summary()
         self.graph = tf.get_default_graph()
 
@@ -94,16 +94,15 @@ class ObjectIdentificationNode:
 
     def callback_foundObject(self,point):
         # Receive the Point of the found object and write to the TransformStamped message for publishing later
-        if self.frame_skipper == 10:
-            self.transform_msg.translation.x = point.point.x
-            self.transform_msg.translation.y = point.point.y
-            self.transform_msg.translation.z = point.point.z
+        self.transform_msg.transform.translation.x = point.point.x
+        self.transform_msg.transform.translation.y = point.point.y
+        self.transform_msg.transform.translation.z = point.point.z
 
 
 
     def identify_object(self):
         rospy.init_node('identify_object')
-        #rospy.Subscriber('/found_object',PointStamped,self.callback_foundObject,queue_size = 1)
+        rospy.Subscriber('/found_object',PointStamped,self.callback_foundObject,queue_size = 1)
         rospy.Subscriber('/object_detection/clipped_image',Image,self.callback_image,queue_size = 1)
 
 

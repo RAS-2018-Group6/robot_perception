@@ -78,8 +78,7 @@ class object_detection:
                     y = 0
 
                 if area >= 4000 and area <= 35000:
-                    if key == 'blue':
-                        positions = [[x,y,w,h]]
+                    positions = [[x,y,w,h]]
                     cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
                     found = True
                     #rospy.loginfo(image)

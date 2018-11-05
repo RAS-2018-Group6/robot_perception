@@ -21,11 +21,11 @@ public:
     DetectObstacleNode(){
         // constructor
         nh_ = ros::NodeHandle("~");
-        dist_from_floor_ = 0.01;
-        range_ = 0.1;
+        dist_from_floor_ = 0.03;
+        range_ = 0.08;
         point_counter_ = 0;
-        point_threshold_ = 20;
-        squared_radius_ = std::pow(0.3,2);
+        point_threshold_ = 3000;
+        squared_radius_ = std::pow(0.40,2);
 
 
         avg_obstacle_x_ = 0.0;
@@ -61,6 +61,7 @@ public:
         obstacle_detected_.data = false;
         ROS_INFO("New Pointcloud");
         //Iterate over Pointcloud
+        point_counter_ = 0;
         for(PointCloud::iterator it = transformed_pointcloud_.begin(); it != transformed_pointcloud_.end(); it++)
         {
           //Remove points with value NAN
@@ -68,6 +69,7 @@ public:
               //Check only the point in the right height range: dist_from_floor_ -> dist_from_floor_ + range_
               //ROS_INFO("Height:%f",it->z);
               if(it->z >= dist_from_floor_ && it->z < dist_from_floor_ + range_){
+
                   //Check if point is in stopping radius_
                   if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
                       //Increment number of counter points in radius and update the average x position and y position
