@@ -69,10 +69,11 @@ public:
               //Check only the point in the right height range: dist_from_floor_ -> dist_from_floor_ + range_
               //ROS_INFO("Height:%f",it->z);
               if(it->z >= dist_from_floor_ && it->z < dist_from_floor_ + range_){
-
+		//ROS_INFO("X: %f , Y: %f", it->x, it->y);
                   //Check if point is in stopping radius_
                   if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
                       //Increment number of counter points in radius and update the average x position and y position
+		      
                       point_counter_++;
                       avg_obstacle_x_ += it->x;
                       avg_obstacle_y_ += it->y;
