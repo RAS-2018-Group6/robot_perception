@@ -25,7 +25,7 @@ public:
         range_ = 0.08;
         point_counter_ = 0;
         point_threshold_ = 3000;
-        squared_radius_ = std::pow(0.40,2);
+        squared_radius_ = std::pow(0.30,2);
 
 
         avg_obstacle_x_ = 0.0;
@@ -48,18 +48,18 @@ public:
         tf::StampedTransform transform;
         try
         {
-            tf_listener_.lookupTransform("/map",msg->header.frame_id, ros::Time(0), transform);
+            tf_listener_.lookupTransform("/base_link",msg->header.frame_id, ros::Time(0), transform);
             ROS_INFO("Waiting for Transform");
         }
         catch (tf::TransformException ex)
         {
             ROS_ERROR("%s",ex.what());
         }
-        ROS_INFO("Doing Transform");
+        //ROS_INFO("Doing Transform");
         pcl_ros::transformPointCloud(*msg,transformed_pointcloud_,transform);
 
         obstacle_detected_.data = false;
-        ROS_INFO("New Pointcloud");
+        //ROS_INFO("New Pointcloud");
         //Iterate over Pointcloud
         point_counter_ = 0;
         for(PointCloud::iterator it = transformed_pointcloud_.begin(); it != transformed_pointcloud_.end(); it++)
@@ -73,7 +73,7 @@ public:
                   //Check if point is in stopping radius_
                   if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
                       //Increment number of counter points in radius and update the average x position and y position
-		      
+
                       point_counter_++;
                       avg_obstacle_x_ += it->x;
                       avg_obstacle_y_ += it->y;
@@ -81,7 +81,7 @@ public:
               }
           }
         }
-        ROS_INFO("Pointcounter:%i",point_counter_);
+        //ROS_INFO("Pointcounter:%i",point_counter_);
         //Check if enough point in radius were detected
         if(point_counter_ >= point_threshold_){
           //Publish obstacle_detected_ true
@@ -92,11 +92,15 @@ public:
           if(point_counter_ != 0){
               avg_obstacle_x_ = avg_obstacle_x_/ ((float) point_counter_);
               avg_obstacle_y_ = avg_obstacle_y_/ ((float) point_counter_);
-              obstacle_pos_.header.frame_id = "map";
+              obstacle_pos_.header.frame_id = "/base_link";
               obstacle_pos_.point.x = avg_obstacle_x_;
               obstacle_pos_.point.y = avg_obstacle_y_;
               obstacle_pos_.point.z = 0.0;
-              obstacle_pos_pub_.publish(obstacle_pos_);
+              ROS_INFO("Detected robot coordinates\nx: %f , y: %f",obstacle_pos_.point.x,obstacle_pos_.point.y);
+              tf_listener_.transformPoint("/map",obstacle_pos_,obstacle_pos_map_);
+              obstacle_pos_map_.point.z = 0.0;
+              ROS_INFO("Published map coordinates:\nx: %f , y: %f",obstacle_pos_map_.point.x,obstacle_pos_map_.point.y);
+              obstacle_pos_pub_.publish(obstacle_pos_map_);
 
           }
         }
@@ -110,6 +114,7 @@ private:
   ros::NodeHandle nh_;
   std_msgs::Bool obstacle_detected_;
   geometry_msgs::PointStamped obstacle_pos_;
+  geometry_msgs::PointStamped obstacle_pos_map_;
 
   double dist_from_floor_;
   double range_;

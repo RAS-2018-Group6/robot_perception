@@ -9,12 +9,13 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 import struct
 import tf
+from object_detection.msg import Objects
 
 
 
 #Node to capture images from the camera and save them to the computer.
 
-class object_detection:
+class object_detection_node:
     def __init__(self):
         self.pos_msg = Pose()
         self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
@@ -178,5 +179,5 @@ class object_detection:
             rate.sleep()
 
 if __name__ == '__main__':
-    detection = object_detection()
+    detection = object_detection_node()
     detection.detect_objects()
