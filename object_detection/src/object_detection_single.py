@@ -9,8 +9,6 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 import struct
 import tf
-from object_detection.msg import Objects
-
 
 
 #Node to capture images from the camera and save them to the computer.
@@ -20,8 +18,8 @@ class object_detection_node:
         self.pos_msg = Pose()
         self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
         self.bounding_box_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publish the image with the bounding box drawn
-        #self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
-        self.clipped_images_pub = rospy.Publisher('/object_detection/clipped_image',Objects,queue_size = 1) #Publishes the clipped image to the object clasification
+        self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
+
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
@@ -45,7 +43,6 @@ class object_detection_node:
         ### TODO: Use tf to display the object in roboter frame
         image = np_array
         found = False
-        object_images = []
         #rospy.loginfo(image.shape)
         #rospy.loginfo(image)
         blurred_image = cv2.GaussianBlur(image,(11,11),0)
@@ -81,23 +78,17 @@ class object_detection_node:
                     y = 0
 
                 if area >= 4000 and area <= 35000:
-                    positions.append([x,y,w,h,key])
-                    clipped_image = image[y:y+h,x:x+w]
-                    object_images.append(clipped_image)
-
+                    positions = [[x,y,w,h]]
+                    cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
                     found = True
                     #rospy.loginfo(image)
 
-        for position in positions:
-            x,y,w,h,key = position
-            cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
         cv2.imshow('display',image)
         cv2.waitKey(1)
-
-
+        clipped_image = image[y:y+h,x:x+w]
         bounding_image = image
 
-        return found,positions,object_images,bounding_image
+        return found,positions,clipped_image,bounding_image
 
 
     def callback_image(self,msg):
@@ -107,18 +98,12 @@ class object_detection_node:
             print(e)
 
 
-        found, positions, object_images, bounding_image = self.scanImage(cv_image)
+        found, positions, clipped_image, bounding_image = self.scanImage(cv_image)
         #print(clipped_image)
 
         if found:
-            objects_msg = Objects()
-            for image in object_images:
-                try:
-                    objects_msg.data.append(self.bridge.cv2_to_imgmsg(image,"bgr8"))
-                except CvBridgeError as e:
-                    print(e)
             try:
-                #self.clipped_images_pub.publish(objects_msg)
+                self.clipped_image_pub.publish(self.bridge.cv2_to_imgmsg(clipped_image, "bgr8"))
                 self.bounding_box_image_pub.publish(self.bridge.cv2_to_imgmsg(bounding_image, "bgr8"))
 
             except CvBridgeError as e:
@@ -126,8 +111,8 @@ class object_detection_node:
 
             # Calculate the 3D position
             if self.pc_bool:
-                for position in positions:
-                    pose_3D = self.calculate3DPositions(position)
+                if positions:
+                    pose_3D = self.calculate3DPositions(positions)
                     #rospy.loginfo(pose_3D)
                     if(pose_3D):
                         pose = PointStamped()
@@ -142,19 +127,9 @@ class object_detection_node:
                         rospy.loginfo(pose_in_map)
                         self.pos_pub.publish(pose_in_map)
                         rospy.loginfo('Published')
-                    else:
-                        pose = PointStamped()
-                        pose.header.frame_id = 'map'
-                        pose.point.x = None
-                        pose.point.y = None
-                        pose.point.z = None
-                        object_msgs.positions.append(pose)
-                self.clipped_images_pub.publish(object_msgs)
 
             else:
                 rospy.loginfo('No PointCloud data available')
-                object_msgs.positions = None
-                self.clipped_images_pub.publish(object_msgs)
 
     def calculate3DPositions(self,positions):
         pose_3D = []

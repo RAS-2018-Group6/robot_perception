@@ -29,6 +29,10 @@
   <build_export_depend>ras_msgs</build_export_depend>
   <exec_depend>ras_msgs</exec_depend>
 
+  <build_depend>object_detection</build_depend>
+  <build_export_depend>object_detection</build_export_depend>
+  <exec_depend>object_detection</exec_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

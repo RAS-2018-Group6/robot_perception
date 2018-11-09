@@ -10,7 +10,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from keras.preprocessing import image
 from keras.models import load_model
 import tensorflow as tf
-from object_detection.msg import Objects
+
 
 #Node to capture images from the camera and save them to the computer.
 
@@ -69,37 +69,40 @@ class ObjectIdentificationNode:
     def callback_image(self,msg):
         if self.frame_skipper == 10:
             self.frame_skipper = 0
-            image_counter = 0
-            for image_messages in msg.data:
-                self.evidence_msg.image_evidence = msg
-                try:
-                    cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-                except CvBridgeError as e:
-                    print(e)
+            self.evidence_msg.image_evidence = msg
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+            except CvBridgeError as e:
+                print(e)
 
-                self.transform_msg.transform.translation.x = message.positions[image_counter].point.x
-                self.transform_msg.transform.translation.y = message.positions[image_counter].point.y
-                self.transform_msg.transform.translation.z = message.positions[image_counter].point.z
 
-                result = self.evaluate_image(cv_image)
+            result = self.evaluate_image(cv_image)
 
-                if result is not None:
-                    rospy.loginfo('Class: '+str(result)+'('+self.result_msgs[result][0]+')')
-                    # Set the output string for the sound message and publish it.
-                    self.sound_msg.data = self.result_msgs[result][1]
-                    self.sound_pub.publish(self.sound_msg)
-                    #Set up evidence msg and publish it
-                    self.evidence_msg.stamp = rospy.get_rostime()
-                    self.evidence_msg.object_id = self.result_msgs[result][0]
-                    self.evidence_msg.object_location = self.transform_msg
-                    self.evidence_pub.publish(self.evidence_msg)
+            if result is not None:
+                rospy.loginfo('Class: '+str(result)+'('+self.result_msgs[result][0]+')')
+                # Set the output string for the sound message and publish it.
+                self.sound_msg.data = self.result_msgs[result][1]
+                self.sound_pub.publish(self.sound_msg)
+                #Set up evidence msg and publish it
+                self.evidence_msg.stamp = rospy.get_rostime()
+                self.evidence_msg.object_id = self.result_msgs[result][0]
+                self.evidence_msg.object_location = self.transform_msg
+                self.evidence_pub.publish(self.evidence_msg)
         else:
             self.frame_skipper += 1
 
 
+    def callback_foundObject(self,point):
+        # Receive the Point of the found object and write to the TransformStamped message for publishing later
+        self.transform_msg.transform.translation.x = point.point.x
+        self.transform_msg.transform.translation.y = point.point.y
+        self.transform_msg.transform.translation.z = point.point.z
+
+
+
     def identify_object(self):
         rospy.init_node('identify_object')
-
+        rospy.Subscriber('/found_object',PointStamped,self.callback_foundObject,queue_size = 1)
         rospy.Subscriber('/object_detection/clipped_image',Objects,self.callback_image,queue_size = 1)
 
 
