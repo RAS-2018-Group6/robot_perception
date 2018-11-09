@@ -25,8 +25,8 @@ class ObjectIdentificationNode:
         #                    11:['blue_cube','I see a blue cube'], 12:['blue_triangle','I see a blue triangle'],
         #                    13:['pruple_cross','I see a purple cross'], 14:['purple_star','I see a purple star']}
 
-        self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],3:['patric','I see Patric'],
-                            2:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
+        self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],2:['patric','I see Patric'],
+                            3:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
 
         self.sound_msg = String()
         self.sound_msg.data = self.result_msgs[6][1]
@@ -67,20 +67,23 @@ class ObjectIdentificationNode:
         return result
 
     def callback_image(self,msg):
+        #rospy.loginfo("Callback Message received")
         if self.frame_skipper == 10:
+            rospy.loginfo("Frame accepted")
             self.frame_skipper = 0
             image_counter = 0
-            for image_messages in msg.data:
-                self.evidence_msg.image_evidence = msg
+            for image_message in msg.data:
+                self.evidence_msg.image_evidence = image_message
                 try:
-                    cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+                    cv_image = self.bridge.imgmsg_to_cv2(image_message, "bgr8")
                 except CvBridgeError as e:
                     print(e)
 
-                self.transform_msg.transform.translation.x = message.positions[image_counter].point.x
-                self.transform_msg.transform.translation.y = message.positions[image_counter].point.y
-                self.transform_msg.transform.translation.z = message.positions[image_counter].point.z
+                self.transform_msg.transform.translation.x = msg.positions[image_counter].point.x
+                self.transform_msg.transform.translation.y = msg.positions[image_counter].point.y
+                self.transform_msg.transform.translation.z = msg.positions[image_counter].point.z
 
+                rospy.loginfo("Evaluate clipped image")
                 result = self.evaluate_image(cv_image)
 
                 if result is not None:
@@ -100,7 +103,7 @@ class ObjectIdentificationNode:
     def identify_object(self):
         rospy.init_node('identify_object')
 
-        rospy.Subscriber('/object_detection/clipped_image',Objects,self.callback_image,queue_size = 1)
+        rospy.Subscriber('/object_detection/clipped_images',Objects,self.callback_image,queue_size = 1)
 
 
 

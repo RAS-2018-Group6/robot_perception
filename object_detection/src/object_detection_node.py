@@ -21,7 +21,7 @@ class object_detection_node:
         self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
         self.bounding_box_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publish the image with the bounding box drawn
         #self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
-        self.clipped_images_pub = rospy.Publisher('/object_detection/clipped_image',Objects,queue_size = 1) #Publishes the clipped image to the object clasification
+        self.clipped_images_pub = rospy.Publisher('/object_detection/clipped_images',Objects,queue_size = 1) #Publishes the clipped image to the object clasification
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
@@ -82,7 +82,7 @@ class object_detection_node:
 
                 if area >= 4000 and area <= 35000:
                     positions.append([x,y,w,h,key])
-                    clipped_image = image[y:y+h,x:x+w]
+                    clipped_image = np.copy(image[y:y+h,x:x+w])
                     object_images.append(clipped_image)
 
                     found = True
@@ -108,7 +108,7 @@ class object_detection_node:
 
 
         found, positions, object_images, bounding_image = self.scanImage(cv_image)
-        #print(clipped_image)
+
 
         if found:
             objects_msg = Objects()
@@ -117,6 +117,9 @@ class object_detection_node:
                     objects_msg.data.append(self.bridge.cv2_to_imgmsg(image,"bgr8"))
                 except CvBridgeError as e:
                     print(e)
+                initial_pose = PointStamped()
+
+
             try:
                 #self.clipped_images_pub.publish(objects_msg)
                 self.bounding_box_image_pub.publish(self.bridge.cv2_to_imgmsg(bounding_image, "bgr8"))
@@ -127,6 +130,10 @@ class object_detection_node:
             # Calculate the 3D position
             if self.pc_bool:
                 for position in positions:
+                    initial_pose.point.x = float('NaN')
+                    initial_pose.point.y = float('NaN')
+                    initial_pose.point.z = float('NaN')
+                    #print(position)
                     pose_3D = self.calculate3DPositions(position)
                     #rospy.loginfo(pose_3D)
                     if(pose_3D):
@@ -139,51 +146,54 @@ class object_detection_node:
 
                         pose_in_map = self.tf_listener.transformPoint("/map",pose)
                         pose_in_map.point.z = 0
-                        rospy.loginfo(pose_in_map)
+                        objects_msg.positions.append(pose_in_map)
+                        #rospy.loginfo(pose_in_map)
                         self.pos_pub.publish(pose_in_map)
-                        rospy.loginfo('Published')
+
                     else:
                         pose = PointStamped()
                         pose.header.frame_id = 'map'
-                        pose.point.x = None
-                        pose.point.y = None
-                        pose.point.z = None
-                        object_msgs.positions.append(pose)
-                self.clipped_images_pub.publish(object_msgs)
+                        pose.point.x = float('NaN')
+                        pose.point.y = float('NaN')
+                        pose.point.z = float('NaN')
+                        objects_msg.positions.append(pose)
+
+                self.clipped_images_pub.publish(objects_msg)
+                rospy.loginfo('Published')
 
             else:
                 rospy.loginfo('No PointCloud data available')
-                object_msgs.positions = None
-                self.clipped_images_pub.publish(object_msgs)
+                self.clipped_images_pub.publish(objects_msg)
+                rospy.loginfo('Published with no Position')
 
-    def calculate3DPositions(self,positions):
+    def calculate3DPositions(self,position):
         pose_3D = []
         if self.pc_bool:
             self.pc_bool = False
             pc_width = self.point_cloud.width
             pc_height = self.point_cloud.height
-            for position in positions:
-                # Create acces points
-                uv = [[u,v] for u in range(position[0],position[0]+position[2],5) for v in range(position[1],position[1]+position[3],5)]
-                #rospy.loginfo(uv)
-                pose_3D = [0,0,0]
-                counter_x = 0
-                counter_y = 0
-                counter_z = 0
-                for point in pc2.read_points(self.point_cloud, skip_nans = True, uvs = uv):
-                    if point[0] != 0:
-                        pose_3D[0] += point[0]
-                        counter_x += 1
-                    if point[1] != 0:
-                        pose_3D[1] += point[1]
-                        counter_y += 1
-                    if point[2] != 0:
-                        pose_3D[2] += point[2]
-                        counter_z += 1
-                if counter_x != 0 and counter_y != 0 and counter_z != 0:
-                    pose_3D[0] = pose_3D[0]/counter_x
-                    pose_3D[1] = pose_3D[1]/counter_y
-                    pose_3D[2] = pose_3D[2]/counter_z
+
+            # Create acces points
+            uv = [[u,v] for u in range(position[0],position[0]+position[2],5) for v in range(position[1],position[1]+position[3],5)]
+            #rospy.loginfo(uv)
+            pose_3D = [0,0,0]
+            counter_x = 0
+            counter_y = 0
+            counter_z = 0
+            for point in pc2.read_points(self.point_cloud, skip_nans = True, uvs = uv):
+                if point[0] != 0:
+                    pose_3D[0] += point[0]
+                    counter_x += 1
+                if point[1] != 0:
+                    pose_3D[1] += point[1]
+                    counter_y += 1
+                if point[2] != 0:
+                    pose_3D[2] += point[2]
+                    counter_z += 1
+            if counter_x != 0 and counter_y != 0 and counter_z != 0:
+                pose_3D[0] = pose_3D[0]/counter_x
+                pose_3D[1] = pose_3D[1]/counter_y
+                pose_3D[2] = pose_3D[2]/counter_z
 
         return pose_3D
 
