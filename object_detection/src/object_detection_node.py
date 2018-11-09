@@ -20,7 +20,8 @@ class object_detection_node:
         self.pos_msg = Pose()
         self.pos_pub = rospy.Publisher('/found_object',PointStamped,queue_size = 1)
         self.bounding_box_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publish the image with the bounding box drawn
-        self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
+        #self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
+        self.clipped_images_pub = rospy.Publisher('/object_detection/clipped_image',Objects,queue_size = 1) #Publishes the clipped image to the object clasification
         self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
         self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
@@ -44,6 +45,7 @@ class object_detection_node:
         ### TODO: Use tf to display the object in roboter frame
         image = np_array
         found = False
+        objects_message = Objects()
         #rospy.loginfo(image.shape)
         #rospy.loginfo(image)
         blurred_image = cv2.GaussianBlur(image,(11,11),0)
