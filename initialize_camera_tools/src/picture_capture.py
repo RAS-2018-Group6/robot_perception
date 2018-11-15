@@ -10,6 +10,7 @@ import numpy as np
 class picture_caputre:
     def __init__(self):
         self.take_image = True
+        self.idx = 0
 
     # Transforms an 1D-BGR array (3*height*width) to an 3D-RGB array (height,width,3)
     def transform_to_image(self,np_array,height,width):
@@ -23,6 +24,7 @@ class picture_caputre:
 
     def callback_image(self,msg):
         # Only take one image
+
         if self.take_image:
             # Convert received image data to CV2 format
             np_image_arr = np.fromstring(msg.data, np.uint8)
@@ -31,8 +33,10 @@ class picture_caputre:
             rospy.loginfo(msg.width)
             np_image = self.transform_to_image(np_image_arr,msg.height,msg.width)
             rospy.loginfo(np_image.shape)
-            cv2.imwrite('/home/ras16/images/test.png',np_image)
-            self.take_image = False
+            save_link = '/home/ras16/maze_images/test_'+str(self.idx)+'.png'
+            self.idx += 1
+            cv2.imwrite(save_link,np_image)
+            self.take_image = True
 
     def save_images(self):
         rospy.init_node('save_images')

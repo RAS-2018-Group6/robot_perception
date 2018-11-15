@@ -1,0 +1,80 @@
+New Clipped Image 
+Min Value: 96.0	 Max Value: 103.0
+Min Value: 210.0	 Max Value: 255.0
+Min Value: 77.0	 Max Value: 160.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 100.0
+Min Value: 223.0	 Max Value: 255.0
+Min Value: 77.0	 Max Value: 147.0
+New Clipped Image 
+Min Value: 94.0	 Max Value: 101.0
+Min Value: 184.0	 Max Value: 255.0
+Min Value: 92.0	 Max Value: 169.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 101.0
+Min Value: 178.0	 Max Value: 255.0
+Min Value: 95.0	 Max Value: 169.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 102.0
+Min Value: 227.0	 Max Value: 255.0
+Min Value: 73.0	 Max Value: 146.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 102.0
+Min Value: 218.0	 Max Value: 255.0
+Min Value: 75.0	 Max Value: 141.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 101.0
+Min Value: 219.0	 Max Value: 255.0
+Min Value: 91.0	 Max Value: 184.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 101.0
+Min Value: 179.0	 Max Value: 255.0
+Min Value: 98.0	 Max Value: 184.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 101.0
+Min Value: 226.0	 Max Value: 255.0
+Min Value: 113.0	 Max Value: 182.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 101.0
+Min Value: 246.0	 Max Value: 255.0
+Min Value: 111.0	 Max Value: 183.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 100.0
+Min Value: 216.0	 Max Value: 255.0
+Min Value: 98.0	 Max Value: 152.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 101.0
+Min Value: 235.0	 Max Value: 255.0
+Min Value: 99.0	 Max Value: 152.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 100.0
+Min Value: 178.0	 Max Value: 255.0
+Min Value: 79.0	 Max Value: 163.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 100.0
+Min Value: 248.0	 Max Value: 255.0
+Min Value: 82.0	 Max Value: 163.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 101.0
+Min Value: 248.0	 Max Value: 255.0
+Min Value: 94.0	 Max Value: 120.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 101.0
+Min Value: 253.0	 Max Value: 255.0
+Min Value: 94.0	 Max Value: 120.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 101.0
+Min Value: 248.0	 Max Value: 255.0
+Min Value: 82.0	 Max Value: 157.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 101.0
+Min Value: 235.0	 Max Value: 255.0
+Min Value: 92.0	 Max Value: 152.0
+New Clipped Image 
+Min Value: 95.0	 Max Value: 100.0
+Min Value: 234.0	 Max Value: 255.0
+Min Value: 80.0	 Max Value: 122.0
+New Clipped Image 
+Min Value: 96.0	 Max Value: 100.0
+Min Value: 234.0	 Max Value: 255.0
+Min Value: 84.0	 Max Value: 124.0

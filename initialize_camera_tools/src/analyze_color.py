@@ -13,20 +13,24 @@ def loadImages(path):
     return images
 
 
-path = '/home/ras/robot_images/hsv_clipped_objects'
+path = '/home/ras16/maze_images/hsv_value_clipped/yellow_cube'
 
 images = loadImages(path)
-print(images)
+file = open("yellow_cube.txt","w")
 
 for image in images:
     print('New Object!')
+    file.write("New Clipped Image \n")
     cv2.imshow('display',image)
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
     blurr = cv2.GaussianBlur(image,(11,11),0)
     hsv = cv2.cvtColor(blurr,cv2.COLOR_BGR2HSV)
     cv2.imshow('display',hsv)
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
     channels = cv2.split(hsv)
     for channel in channels:
         min_Val,max_Val,min,max = cv2.minMaxLoc(channel)
         print("Min Value: " +str(min_Val)+"\nMax Value: " + str(max_Val))
+        file.write("Min Value: " +str(min_Val)+"\t Max Value: " + str(max_Val)+"\n")
+print("Done")
+file.close()

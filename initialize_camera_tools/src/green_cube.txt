@@ -1,0 +1,64 @@
+New Clipped Image 
+Min Value: 72.0	 Max Value: 77.0
+Min Value: 160.0	 Max Value: 255.0
+Min Value: 68.0	 Max Value: 104.0
+New Clipped Image 
+Min Value: 71.0	 Max Value: 75.0
+Min Value: 216.0	 Max Value: 255.0
+Min Value: 65.0	 Max Value: 76.0
+New Clipped Image 
+Min Value: 59.0	 Max Value: 76.0
+Min Value: 130.0	 Max Value: 255.0
+Min Value: 50.0	 Max Value: 123.0
+New Clipped Image 
+Min Value: 55.0	 Max Value: 68.0
+Min Value: 183.0	 Max Value: 220.0
+Min Value: 50.0	 Max Value: 70.0
+New Clipped Image 
+Min Value: 71.0	 Max Value: 79.0
+Min Value: 198.0	 Max Value: 255.0
+Min Value: 67.0	 Max Value: 122.0
+New Clipped Image 
+Min Value: 72.0	 Max Value: 79.0
+Min Value: 217.0	 Max Value: 255.0
+Min Value: 67.0	 Max Value: 122.0
+New Clipped Image 
+Min Value: 62.0	 Max Value: 77.0
+Min Value: 157.0	 Max Value: 255.0
+Min Value: 60.0	 Max Value: 130.0
+New Clipped Image 
+Min Value: 63.0	 Max Value: 77.0
+Min Value: 171.0	 Max Value: 255.0
+Min Value: 62.0	 Max Value: 129.0
+New Clipped Image 
+Min Value: 70.0	 Max Value: 78.0
+Min Value: 178.0	 Max Value: 255.0
+Min Value: 53.0	 Max Value: 119.0
+New Clipped Image 
+Min Value: 68.0	 Max Value: 77.0
+Min Value: 189.0	 Max Value: 255.0
+Min Value: 53.0	 Max Value: 116.0
+New Clipped Image 
+Min Value: 71.0	 Max Value: 80.0
+Min Value: 237.0	 Max Value: 255.0
+Min Value: 61.0	 Max Value: 129.0
+New Clipped Image 
+Min Value: 71.0	 Max Value: 80.0
+Min Value: 236.0	 Max Value: 255.0
+Min Value: 60.0	 Max Value: 130.0
+New Clipped Image 
+Min Value: 71.0	 Max Value: 79.0
+Min Value: 183.0	 Max Value: 255.0
+Min Value: 59.0	 Max Value: 129.0
+New Clipped Image 
+Min Value: 70.0	 Max Value: 79.0
+Min Value: 160.0	 Max Value: 255.0
+Min Value: 60.0	 Max Value: 129.0
+New Clipped Image 
+Min Value: 71.0	 Max Value: 77.0
+Min Value: 195.0	 Max Value: 255.0
+Min Value: 58.0	 Max Value: 97.0
+New Clipped Image 
+Min Value: 70.0	 Max Value: 77.0
+Min Value: 151.0	 Max Value: 255.0
+Min Value: 59.0	 Max Value: 97.0
