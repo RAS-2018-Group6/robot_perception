@@ -9,11 +9,23 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   std_msgs
   tf2
+  message_generation
 )
+
+add_message_files(
+  FILES
+  Obstacle.msg
+)
+
+ generate_messages(
+   DEPENDENCIES
+  geometry_msgs std_msgs
+)
+
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES obstacle_detection
-#  CATKIN_DEPENDS cv_bridge pcl_ros roscpp sensor_msgs std_msgs tf2
+CATKIN_DEPENDS cv_bridge pcl_ros roscpp sensor_msgs std_msgs tf2 message_runtime
 #  DEPENDS system_lib
 )
 
