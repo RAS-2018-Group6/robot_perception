@@ -28,7 +28,6 @@ public:
         point_threshold_ = 3000;
         squared_radius_ = std::pow(0.30,2);
 
-
         avg_obstacle_x_ = 0.0;
         avg_obstacle_y_ = 0.0;
 

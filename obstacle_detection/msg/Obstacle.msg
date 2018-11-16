@@ -1,2 +1,2 @@
 Header header
-geometry_msgs/PointStamped positions[3]
+geometry_msgs/PointStamped[3] positions
