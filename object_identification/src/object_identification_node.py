@@ -17,16 +17,17 @@ from object_detection.msg import Objects
 class ObjectIdentificationNode:
     def __init__(self):
 
-        #possible event [0] and sound [1] messages
-        #self.result_msgs = {0:['an_object','I see an object'], 1:['yellow_cube','I see a yellow cube'], 2:['yellow_ball','I see a yellow ball'],
-        #                    3:['green_cube','I see a green cube'], 4:['green_cylinder','I see a green cylinder'],5:['green_hollow_cube','I see a green hollow cube'],
-        #                    6:['orange_cross','I see an orange cross'], 7:['patric','I see Patric'],
-        #                    8:['red_cylinder','I see a red cylinder'],9:['red_hollow_cube','I see a red hollow cube'], 10: ['red_ball','I see a red ball'],
-        #                    11:['blue_cube','I see a blue cube'], 12:['blue_triangle','I see a blue triangle'],
-        #                    13:['pruple_cross','I see a purple cross'], 14:['purple_star','I see a purple star']}
+        possible event [0] and sound [1] messages
+        self.result_msgs = {0:['yellow_cube','I see a yellow cube'], 1:['yellow_ball','I see a yellow ball'],
+                            2:['green_cube','I see a green cube'], 3:['green_cylinder','I see a green cylinder'],4:['green_hollow_cube','I see a green hollow cube'],
+                            5:['orange_cross','I see an orange cross'], 6:['patric','I see Patric'],
+                            7:['red_cylinder','I see a red cylinder'],8:['red_hollow_cube','I see a red hollow cube'], 9: ['red_ball','I see a red ball'],
+                            10:['blue_cube','I see a blue cube'], 11:['blue_triangle','I see a blue triangle'],
+                            12:['pruple_cross','I see a purple cross'], 13:['purple_star','I see a purple star'],
+                            14:['an_object', 'I see an object']}
 
-        self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],2:['patric','I see Patric'],
-                            3:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
+        #self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],2:['patric','I see Patric'],
+        #                    3:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
 
         self.sound_msg = String()
         self.sound_msg.data = self.result_msgs[6][1]
@@ -60,7 +61,7 @@ class ObjectIdentificationNode:
             rospy.loginfo(prediction)
             max_prob = np.max(prediction)
             if max_prob < 0.9:
-                result = 6
+                result = 14
             else:
                 result = np.argmax(prediction)
 
