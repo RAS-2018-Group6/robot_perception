@@ -47,6 +47,11 @@ class ObjectIdentificationNode:
         self.model.summary()
         self.graph = tf.get_default_graph()
 
+        self.object_list = []
+
+    def manage_objects(self, identification, position):
+        known_object = False
+        return known_object
 
     def evaluate_image(self,cv_image):
         #TODO: Load the trained neural network model and set according to the result the right values for the evidence message and sound message
@@ -89,14 +94,16 @@ class ObjectIdentificationNode:
 
                 if result is not None:
                     rospy.loginfo('Class: '+str(result)+'('+self.result_msgs[result][0]+')')
-                    # Set the output string for the sound message and publish it.
-                    self.sound_msg.data = self.result_msgs[result][1]
-                    self.sound_pub.publish(self.sound_msg)
-                    #Set up evidence msg and publish it
-                    self.evidence_msg.stamp = rospy.get_rostime()
-                    self.evidence_msg.object_id = self.result_msgs[result][0]
-                    self.evidence_msg.object_location = self.transform_msg
-                    self.evidence_pub.publish(self.evidence_msg)
+                    known_object = self.manage_objects(result,[self.transform_msg.transform.translation.x, self.transform_msg.transform.translation.y])
+                    if not known_object:
+                        # Set the output string for the sound message and publish it.
+                        self.sound_msg.data = self.result_msgs[result][1]
+                        self.sound_pub.publish(self.sound_msg)
+                        #Set up evidence msg and publish it
+                        self.evidence_msg.stamp = rospy.get_rostime()
+                        self.evidence_msg.object_id = self.result_msgs[result][0]
+                        self.evidence_msg.object_location = self.transform_msg
+                        self.evidence_pub.publish(self.evidence_msg)
         else:
             self.frame_skipper += 1
 
