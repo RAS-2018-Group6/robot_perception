@@ -18,13 +18,13 @@ import math
 class ObjectIdentificationNode:
     def __init__(self):
 
-        possible event [0] and sound [1] messages
-        self.result_msgs = {0:['yellow_cube','I see a yellow cube'], 1:['yellow_ball','I see a yellow ball'],
-                            2:['green_cube','I see a green cube'], 3:['green_cylinder','I see a green cylinder'],4:['green_hollow_cube','I see a green hollow cube'],
-                            5:['orange_cross','I see an orange cross'], 6:['patric','I see Patric'],
-                            7:['red_cylinder','I see a red cylinder'],8:['red_hollow_cube','I see a red hollow cube'], 9: ['red_ball','I see a red ball'],
-                            10:['blue_cube','I see a blue cube'], 11:['blue_triangle','I see a blue triangle'],
-                            12:['pruple_cross','I see a purple cross'], 13:['purple_star','I see a purple star'],
+        #possible event [0] and sound [1] messages
+        self.result_msgs = {5:['yellow_cube','I see a yellow cube'], 0:['yellow_ball','I see a yellow ball'],
+                            6:['green_cube','I see a green cube'], 7:['green_cylinder','I see a green cylinder'],8:['green_hollow_cube','I see a green hollow cube'],
+                            9:['orange_cross','I see an orange cross'], 10:['patric','I see Patric'],
+                            11:['red_cylinder','I see a red cylinder'],12:['red_hollow_cube','I see a red hollow cube'], 13: ['red_ball','I see a red ball'],
+                            1:['blue_cube','I see a blue cube'], 2:['blue_triangle','I see a blue triangle'],
+                            3:['pruple_cross','I see a purple cross'], 4:['purple_star','I see a purple star'],
                             14:['an_object', 'I see an object']}
 
         #self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],2:['patric','I see Patric'],
@@ -44,7 +44,7 @@ class ObjectIdentificationNode:
 
         self.frame_skipper = 0
 
-        self.model = load_model('/home/ras16/networks/my_network_less_yellow.h5')
+        self.model = load_model('/home/ras16/networks/my_network_all_classes_98.h5')
         self.model.summary()
         self.graph = tf.get_default_graph()
 
@@ -55,6 +55,7 @@ class ObjectIdentificationNode:
     #Position of the detected object: [x,y] in the map frame
     def manage_objects(self, identification, position):
         # Check if class was determined at all
+        return False, 0
         known_object = False
         id = None
         object_counter = len(self.object_list)
@@ -80,7 +81,7 @@ class ObjectIdentificationNode:
                 # Check if there are close by objects
                 if close_objects:
                     #Sort the objects by distance: closest first
-                    close_objects.sort(key: lambda x: x[1])
+                    close_objects.sort(key= lambda x: x[1])
 
                     for object_dist in close_objects:
                         obj = object_dist[0]
@@ -198,8 +199,8 @@ class ObjectIdentificationNode:
 
                 if result is not None:
                     rospy.loginfo('Class: '+str(result)+'('+self.result_msgs[result][0]+')')
-                    id = None
-                    known_object, id = self.manage_objects(result,[self.transform_msg.transform.translation.x, self.transform_msg.transform.translation.y])
+                    idf = None
+                    known_object, idf = self.manage_objects(result,[self.transform_msg.transform.translation.x, self.transform_msg.transform.translation.y])
                     if not known_object:
                         # Set the output string for the sound message and publish it.
                         self.sound_msg.data = self.result_msgs[result][1]
@@ -210,7 +211,7 @@ class ObjectIdentificationNode:
                         self.evidence_msg.object_location = self.transform_msg
                         self.evidence_pub.publish(self.evidence_msg)
                     else:
-                        rospy.loginfo("Previously seen Object with ID: " + str(id) + "has been seen again.")
+                        rospy.loginfo("Previously seen Object with ID: " + str(idf) + "has been seen again.")
         else:
             self.frame_skipper += 1
 

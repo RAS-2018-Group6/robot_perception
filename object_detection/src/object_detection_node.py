@@ -153,7 +153,7 @@ class object_detection_node:
                         pose_in_map = self.tf_listener.transformPoint("/map",pose)
                         pose_in_map.point.z = 0
                         objects_msg.positions.append(pose_in_map)
-                        #rospy.loginfo(pose_in_map)
+                        rospy.loginfo(pose_in_map)
                         self.pos_pub.publish(pose_in_map)
 
                     else:
@@ -165,7 +165,7 @@ class object_detection_node:
                         objects_msg.positions.append(pose)
 
                 self.clipped_images_pub.publish(objects_msg)
-                rospy.loginfo('Published')
+                #rospy.loginfo('Published')
 
             else:
                 rospy.loginfo('No PointCloud data available')
