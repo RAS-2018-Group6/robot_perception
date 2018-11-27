@@ -82,9 +82,18 @@ class object_detection_node:
                 w = w + 40
                 h = h + 40
 
-                if x < 0 or y < 0:
+                if x < 0:
                     x = 0
-                    y = 0
+
+                if y < 0:
+                    y = 0    
+
+                if y + h > 479:
+                    h = 479-y
+                    rospy.loginfo("Test: " + str(x) + " " + str(w))
+
+                if x + w > 639:
+                    w = 639-x
 
                 if area >= 4000 and area <= 35000:
                     positions.append([x,y,w,h,key])

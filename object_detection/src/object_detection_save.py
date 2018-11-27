@@ -27,7 +27,7 @@ class object_detection_save:
         self.upper = {'red':(6,255,214), 'green':(80,255,190), 'blue':(101,255,180), 'yellow':(25,250,255), 'orange':(13,255,240), 'purple':(160,150,187)}
 
         self.colors = {'red':(0,0,255), 'green':(0,255,0), 'blue':(255,0,0), 'yellow':(0, 255, 217), 'orange':(0,140,255), 'purple':(210,255,128)}
-        self.counter = 2300
+        self.counter = 0
 
         self.bridge = CvBridge()
 
@@ -85,7 +85,7 @@ class object_detection_save:
                     #cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
                     found = True
                     clipped_image = image[y:y+h,x:x+w]
-                    path = '/home/ras16/dataset/maze_data/'
+                    path = '/home/ras16/dataset/maze_data_collection/'
                     save_path = path + 'image_' + str(self.counter) + '.png'
                     self.counter += 1
                     cv2.imwrite(save_path,clipped_image)
