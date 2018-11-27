@@ -86,11 +86,10 @@ class object_detection_node:
                     x = 0
 
                 if y < 0:
-                    y = 0    
+                    y = 0
 
                 if y + h > 479:
                     h = 479-y
-                    rospy.loginfo("Test: " + str(x) + " " + str(w))
 
                 if x + w > 639:
                     w = 639-x
@@ -143,8 +142,10 @@ class object_detection_node:
                 print(e)
 
             # Calculate the 3D position
+
             if self.pc_bool:
                 for position in positions:
+
                     initial_pose.point.x = float('NaN')
                     initial_pose.point.y = float('NaN')
                     initial_pose.point.z = float('NaN')
@@ -162,7 +163,7 @@ class object_detection_node:
                         pose_in_map = self.tf_listener.transformPoint("/map",pose)
                         pose_in_map.point.z = 0
                         objects_msg.positions.append(pose_in_map)
-                        rospy.loginfo(pose_in_map)
+                        #rospy.loginfo(pose_in_map)
                         self.pos_pub.publish(pose_in_map)
 
                     else:
@@ -175,6 +176,7 @@ class object_detection_node:
 
                 self.clipped_images_pub.publish(objects_msg)
                 #rospy.loginfo('Published')
+                self.pc_bool = False
 
             else:
                 rospy.loginfo('No PointCloud data available')
@@ -184,7 +186,6 @@ class object_detection_node:
     def calculate3DPositions(self,position):
         pose_3D = []
         if self.pc_bool:
-            self.pc_bool = False
             pc_width = self.point_cloud.width
             pc_height = self.point_cloud.height
 
