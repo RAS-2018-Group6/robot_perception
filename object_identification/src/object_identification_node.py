@@ -89,7 +89,7 @@ class ObjectIdentificationNode:
             if close_objects:
                 #Sort the objects by distance: closest first
                 close_objects.sort(key= lambda x: x[1])
-                rospy.loginfo(close_objects)
+                #rospy.loginfo(close_objects)
 
                 #Only evaluate the closest objects depending on the number of objects detected in the frame
                 close_objects_counter = 0
@@ -107,7 +107,7 @@ class ObjectIdentificationNode:
                             # Therefore the first time an close object with the same class was encountered the function breaks and returns
                             self.object_list[idx][2] = (self.object_list[idx][2] + position[0]) / 2 #Average x position
                             self.object_list[idx][3] = (self.object_list[idx][3] + position[1]) / 2 #Average y position
-                            self.object_list[idx][4] += 2 #Increase the votes the object has
+                            self.object_list[idx][4] += 4 #Increase the votes the object has
                             known_object = True
                             id = self.object_list[idx][0]
                             rospy.loginfo("Case 1")
@@ -190,7 +190,6 @@ class ObjectIdentificationNode:
         return known_object, id
 
     def evaluate_image(self,cv_image):
-        #TODO: Load the trained neural network model and set according to the result the right values for the evidence message and sound message
         result = None
         resized_image = cv2.resize(cv_image,(32,32))
         array = np.asarray(resized_image)
@@ -211,9 +210,17 @@ class ObjectIdentificationNode:
     def callback_image(self,msg):
         #rospy.loginfo("Callback Message received")
         if self.frame_skipper == 10:
+            print("\n")
             rospy.loginfo("Frame accepted")
             n_detected_objects = len(msg.positions)
-            rospy.loginfo(self.object_list)
+            rospy.loginfo("Known Objects:")
+            printed = False
+            for object in self.object_list:
+                if object[4] > 15:
+                    rospy.loginfo("Object with ID: "+str(object[0])+ " and class: " + self.result_msgs[object[1]][0])
+                    printed = True
+                if not printed:
+                    rospy.loginfo("No known objects")
             self.frame_skipper = 0
             image_counter = 0
             for image_message in msg.data:
@@ -226,7 +233,7 @@ class ObjectIdentificationNode:
                 self.transform_msg.transform.translation.x = msg.positions[image_counter].point.x
                 self.transform_msg.transform.translation.y = msg.positions[image_counter].point.y
                 self.transform_msg.transform.translation.z = msg.positions[image_counter].point.z
-
+                print("\n")
                 rospy.loginfo("Evaluate clipped image")
                 result = self.evaluate_image(cv_image)
                 image_counter += 1
