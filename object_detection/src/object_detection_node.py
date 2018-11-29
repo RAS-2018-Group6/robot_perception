@@ -164,7 +164,7 @@ class object_detection_node:
                         pose_in_map.point.z = 0
                         objects_msg.positions.append(pose_in_map)
                         #rospy.loginfo(pose_in_map)
-                        self.pos_pub.publish(pose_in_map)
+                        #self.pos_pub.publish(pose_in_map)
 
                     else:
                         pose = PointStamped()

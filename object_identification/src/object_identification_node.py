@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 from ras_msgs.msg import RAS_Evidence
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose,PointStamped, TransformStamped
@@ -11,6 +11,7 @@ from keras.preprocessing import image
 from keras.models import load_model
 import tensorflow as tf
 from object_detection.msg import Objects
+from object_identification.msg import ObjectList
 import math
 
 #Node to capture images from the camera and save them to the computer.
@@ -39,6 +40,7 @@ class ObjectIdentificationNode:
         self.transform_msg = TransformStamped()
         self.evidence_msg.object_location = self.transform_msg
         self.evidence_pub = rospy.Publisher('/evidence',RAS_Evidence,queue_size = 1)
+        self.known_objects_pub = rospy.Publisher('/known_objects', ObjectList, queue_size = 1)
 
         self.bridge = CvBridge()
 
@@ -258,10 +260,31 @@ class ObjectIdentificationNode:
             self.frame_skipper += 1
 
 
+    def callback_exploration(self, msg):
+        if msg.data == true:
+            object_list_msg = ObjectList()
+            object_list_msg.header.frame_id = "/map"
+            if self.object_list:
+                for obj in self.object_list:
+                    pose = PointStamped()
+                    pose.header.frame_id = "/map"
+                    pose.point.x = obj[2]
+                    pose.point.y = obj[3]
+                    object_list_msg.positions.append(pose)
+                    object_list_msg.id.append(obj[0])
+                    object_list_msg.object_class.append(obj[1])
+                self.known_objects_pub.publish(object_list_msg)
+            else:
+                rospy.loginfo("No objects detected")
+
+
+
     def identify_object(self):
         rospy.init_node('identify_object')
 
         rospy.Subscriber('/object_detection/clipped_images',Objects,self.callback_image,queue_size = 1)
+        rospy.Subscriber('/finished_exploring',Bool, self.callback_exploration, queue_size = 1)
+
 
 
 
