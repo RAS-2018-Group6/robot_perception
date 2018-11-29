@@ -261,18 +261,19 @@ class ObjectIdentificationNode:
 
 
     def callback_exploration(self, msg):
-        if msg.data == true:
+        if msg.data == True:
             object_list_msg = ObjectList()
             object_list_msg.header.frame_id = "/map"
             if self.object_list:
                 for obj in self.object_list:
-                    pose = PointStamped()
-                    pose.header.frame_id = "/map"
-                    pose.point.x = obj[2]
-                    pose.point.y = obj[3]
-                    object_list_msg.positions.append(pose)
-                    object_list_msg.id.append(obj[0])
-                    object_list_msg.object_class.append(obj[1])
+		    if obj[4] > 15:
+		            pose = PointStamped()
+		            pose.header.frame_id = "/map"
+		            pose.point.x = obj[2]
+		            pose.point.y = obj[3]
+		            object_list_msg.positions.append(pose)
+		            object_list_msg.id.append(obj[0])
+		            object_list_msg.object_class.append(obj[1])
                 self.known_objects_pub.publish(object_list_msg)
             else:
                 rospy.loginfo("No objects detected")
