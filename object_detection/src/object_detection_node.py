@@ -10,6 +10,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import struct
 import tf
 from object_detection.msg import Objects
+from std_msgs import Bool
 
 
 
@@ -22,6 +23,7 @@ class object_detection_node:
         self.bounding_box_image_pub = rospy.Publisher('/object_detection/detected_image',Image, queue_size = 1) #Publish the image with the bounding box drawn
         #self.clipped_image_pub = rospy.Publisher('/object_detection/clipped_image',Image,queue_size = 1) #Publishes the clipped image to the object clasification
         self.clipped_images_pub = rospy.Publisher('/object_detection/clipped_images',Objects,queue_size = 1) #Publishes the clipped image to the object clasification
+        self.object_detected_pub = rospy.Publisher('/wall_detected',Bool,queue_size=1)
 
         # Previous HSV masks table
         #self.lower = {'red':(0, 169, 84), 'green':(37, 150, 60), 'blue':(80, 114, 60), 'yellow':(17, 150, 115), 'orange':(5, 190, 130), 'purple':(100,32,81)}
@@ -125,6 +127,9 @@ class object_detection_node:
 
 
         if found:
+            detected = Bool()
+            detected.data = True
+            self.object_detected_pub.publish(detected)
             objects_msg = Objects()
             for image in object_images:
                 try:
