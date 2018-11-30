@@ -10,7 +10,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import struct
 import tf
 from object_detection.msg import Objects
-from std_msgs import Bool
+from std_msgs.msg import Bool
 
 
 
