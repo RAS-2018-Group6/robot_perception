@@ -10,7 +10,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import struct
 import tf
 from object_detection.msg import Objects
-from std_msgs import Bool
+from std_msgs.msg import Bool
 
 
 
@@ -96,7 +96,7 @@ class object_detection_node:
                 if x + w > 639:
                     w = 639-x
 
-                if area >= 4000 and area <= 35000:
+                if area >= 3500 and area <= 40000:
                     positions.append([x,y,w,h,key])
                     clipped_image = np.copy(image[y:y+h,x:x+w])
                     object_images.append(clipped_image)
