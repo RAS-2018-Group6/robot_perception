@@ -155,7 +155,7 @@ class ObjectIdentificationNode:
             prediction = self.model.predict(array)
             #rospy.loginfo(prediction)
             max_prob = np.max(prediction)
-            if max_prob < 0.95:
+            if max_prob < 0.5:
                 result = 14
             else:
                 result = np.argmax(prediction)
@@ -171,7 +171,7 @@ class ObjectIdentificationNode:
             rospy.loginfo("Known Objects:")
             printed = False
             for object in self.object_list:
-                if object[4] > 20:
+                if object[4] > 10:
                     rospy.loginfo("Object with ID: "+str(object[0])+ " and class: " + self.result_msgs[object[1]][0] + " and votes: " +str(object[4]) + " at position: (" + str(object[2]) + ", "+str(object[3]) + ")")
                     printed = True
                 if not printed:
@@ -221,7 +221,7 @@ class ObjectIdentificationNode:
             object_list_msg.header.frame_id = "/map"
             if self.object_list:
                 for obj in self.object_list:
-		    if obj[4] > 20:
+		    if obj[4] > 10:
 		            pose = PointStamped()
 		            pose.header.frame_id = "/map"
 		            pose.point.x = obj[2]

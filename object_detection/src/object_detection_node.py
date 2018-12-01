@@ -165,8 +165,8 @@ class object_detection_node:
                         pose.point.z = 0 #Robot Z = Camera Y, set to zero because we do not want to have height, assume straight downward projection on the x,y plane
 
                         #time = self.tf_listener.getLatestCommonTime("/map",self.point_cloud.header.frame_id)
-                        time = self.tf_listener.getLatestCommonTime("/map","/camera_link")
-                        pose.header.stamp = time
+                        #time = self.tf_listener.getLatestCommonTime("/map","/camera_link")
+                        #pose.header.stamp = time
                         pose_in_map = self.tf_listener.transformPoint("/map",pose)
                         pose_in_map.point.z = 0
                         objects_msg.positions.append(pose_in_map)
