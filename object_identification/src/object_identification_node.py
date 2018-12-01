@@ -26,7 +26,7 @@ class ObjectIdentificationNode:
                             7:['red_cylinder','I see a red cylinder','red'],8:['red_hollow_cube','I see a red hollow cube','red'], 9: ['red_ball','I see a red ball','red'],
                             10:['blue_cube','I see a blue cube','blue'], 11:['blue_triangle','I see a blue triangle','blue'],
                             12:['purple_cross','I see a purple cross','purple'], 13:['purple_star','I see a purple star','purple'],
-                            14:['an_object', 'I see an object','none']}
+                            14:['other', 'I see something','none']}
 
         #self.result_msgs = {0:['blue_triangle','I see a blue_triangle'],1:['green_cylinder','I see a green cylinder'],2:['patric','I see Patric'],
         #                    3:['pruple_cross','I see a purple cross'], 4:['red_ball','I see a red_ball'], 5:['yellow_cube','I see a yellow cube'], 6:['an_object','I see an object']}
@@ -46,7 +46,7 @@ class ObjectIdentificationNode:
 
         self.frame_skipper = 0
 
-        self.model = load_model('/home/ras16/networks/simple_network.h5')
+        self.model = load_model('/home/ras16/networks/simple_network_14.h5')
         self.model.summary()
         self.graph = tf.get_default_graph()
 
