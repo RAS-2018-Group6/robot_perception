@@ -244,8 +244,8 @@ class ObjectIdentificationNode:
             certain_objects = []
             if self.object_list:
                 for obj in self.object_list:
-		            if obj[4] > 10:
-                        certain_objects.append[obj]
+                    if obj[4] > 10:
+                        certain_objects.append(obj)
 
                 certain_objects = fuse_objects(certain_objects)
                 rospy.loginf("Known objects that are published to the map:")
