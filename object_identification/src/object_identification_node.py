@@ -66,6 +66,8 @@ class ObjectIdentificationNode:
     #Identification result: integer describing the class => self.result_msgs
     #Position of the detected object: [x,y] in the map frame
     def manage_objects(self, identification, position, n_objects):
+        if identification == 14:
+            return True, None
         # Check if class was determined at all
         # return False, None
         #print(self.object_list)
@@ -115,8 +117,6 @@ class ObjectIdentificationNode:
                         self.object_list[idx][4] += votes #Change the votes the object has
                         rospy.loginfo("Case 2")
                     else:
-                        self.object_list[idx][2] = (self.object_list[idx][2] + position[0]) / 2 #Average x position
-                        self.object_list[idx][3] = (self.object_list[idx][3] + position[1]) / 2 #Average y position
                         self.object_list[idx][4] -= votes #Change the votes the object has
                         if self.object_list[idx][4] <= 0:
                             self.object_list.remove(obj)
@@ -155,7 +155,7 @@ class ObjectIdentificationNode:
             prediction = self.model.predict(array)
             #rospy.loginfo(prediction)
             max_prob = np.max(prediction)
-            if max_prob < 0.5:
+            if max_prob < 0.95:
                 result = 14
             else:
                 result = np.argmax(prediction)
@@ -171,7 +171,7 @@ class ObjectIdentificationNode:
             rospy.loginfo("Known Objects:")
             printed = False
             for object in self.object_list:
-                if object[4] > 30:
+                if object[4] > 20:
                     rospy.loginfo("Object with ID: "+str(object[0])+ " and class: " + self.result_msgs[object[1]][0] + " and votes: " +str(object[4]) + " at position: (" + str(object[2]) + ", "+str(object[3]) + ")")
                     printed = True
                 if not printed:
@@ -207,6 +207,8 @@ class ObjectIdentificationNode:
                         self.evidence_msg.object_location = self.transform_msg
                         self.evidence_pub.publish(self.evidence_msg)
                         rospy.loginfo("New Object with ID: " + str(idf) + " has been seen.")
+                    elif idf is None:
+                        rospy.loginfo("Object could not be identified")
                     else:
                         rospy.loginfo("Previously seen Object with ID: " + str(idf) + " has been seen again.")
         else:
@@ -219,7 +221,7 @@ class ObjectIdentificationNode:
             object_list_msg.header.frame_id = "/map"
             if self.object_list:
                 for obj in self.object_list:
-		    if obj[4] > 50:
+		    if obj[4] > 20:
 		            pose = PointStamped()
 		            pose.header.frame_id = "/map"
 		            pose.point.x = obj[2]

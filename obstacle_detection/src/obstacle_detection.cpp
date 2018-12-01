@@ -22,7 +22,7 @@ public:
     DetectObstacleNode(){
         // constructor
         nh_ = ros::NodeHandle("~");
-        dist_from_floor_ = 0.015;
+        dist_from_floor_ = 0.025;
         range_ = 0.08;
         point_counter_ = 0;
         point_threshold_ = 2000;

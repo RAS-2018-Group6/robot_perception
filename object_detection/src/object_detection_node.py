@@ -30,8 +30,8 @@ class object_detection_node:
         #self.upper = {'red':(10,255,175), 'green':(70,255,190), 'blue':(110,255,170), 'yellow':(25,255,230), 'orange':(18,255,215), 'purple':(180,150,185)}
 
         # Maze HSV values
-        self.lower = {'red':(0, 150, 70), 'green':(40, 130, 50), 'blue':(95, 130, 60), 'yellow':(16, 160, 100), 'orange':(7, 200, 130), 'purple':(120,60,70)}
-        self.upper = {'red':(6,255,214), 'green':(80,255,190), 'blue':(101,255,180), 'yellow':(25,250,255), 'orange':(13,255,240), 'purple':(160,150,187)}
+        self.lower = {'red':(0, 150, 70), 'green':(40, 130, 50), 'blue':(95, 130, 60), 'yellow':(16, 160, 115), 'orange':(7, 200, 130), 'purple':(120,60,70)}
+        self.upper = {'red':(6,255,214), 'green':(80,255,190), 'blue':(101,255,180), 'yellow':(25,250,230), 'orange':(13,255,240), 'purple':(160,150,187)}
 
         self.colors = {'red':(0,0,255), 'green':(0,255,0), 'blue':(255,0,0), 'yellow':(0, 255, 217), 'orange':(0,140,255), 'purple':(212,255,255)}
 
