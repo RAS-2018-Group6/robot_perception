@@ -50,16 +50,16 @@ class ObjectIdentificationNode:
         self.model.summary()
         self.graph = tf.get_default_graph()
 
-        # Structure: [ID, class_ID, pos_x,pox_y, votes]
+        # Structure: [ID, class_ID, pos_x, pox_y, votes]
         self.object_list = []
         self.object_counter = 0
 
 
     def calculate_similarity(self, identification, obj_class):
         if identification == obj_class:
-            return 2, 1
+            return 2, 2
         elif self.result_msgs[identification][2] == self.result_msgs[obj_class][2]:
-            return 0.5, 0
+            return 0.5, 1
         else:
             return -1.5, 0
 
@@ -103,7 +103,7 @@ class ObjectIdentificationNode:
                 #Check if new object was classified at all
                 votes, same = self.calculate_similarity(identification, obj[1])
                 if votes >= 0:
-                    if not known_object and same:
+                    if not known_object and same == 2:
                         known_object = True
                         id = obj[0]
                         self.object_list[idx][2] = (self.object_list[idx][2] + position[0]) / 2 #Average x position
@@ -174,8 +174,8 @@ class ObjectIdentificationNode:
                 if object[4] > 10:
                     rospy.loginfo("Object with ID: "+str(object[0])+ " and class: " + self.result_msgs[object[1]][0] + " and votes: " +str(object[4]) + " at position: (" + str(object[2]) + ", "+str(object[3]) + ")")
                     printed = True
-                if not printed:
-                    rospy.loginfo("No known objects")
+            if not printed:
+                rospy.loginfo("No known objects")
             self.frame_skipper = 0
             image_counter = 0
             for image_message in msg.data:
@@ -215,21 +215,50 @@ class ObjectIdentificationNode:
             self.frame_skipper += 1
 
 
+    def fuse_objects(self, object_list):
+        fused_list = []
+        # Sort list by votes
+        sorted_list = object_list.sort(key= lambda x: x[4], reverse = True)
+        counter = 0
+        for obj in sorted_list:
+            #Calculate closest objects
+            counter += 1
+            for next_obj in sorted_list[counter:-1]:
+                distance = math.sqrt(pow((obj[2]-next_obj[2]), 2) + pow((obj[3] - next_obj[3]),2))
+                if distance <= 0.2:
+                    votes, same = self.calculate_similarity(obj[1], next_obj[1])
+                    if same:
+                        obj[2] = (obj[2] * obj[4] + next_obj[2] * next_obj[4]) / (obj[4] + next_obj[4]) #Average x position based on votes
+                        obj[3] = (obj[3] * obj[4] + next_obj[3] * next_obj[4]) / (obj[4] + next_obj[4]) #Average y position based on votes
+                        sorted_list.remove(next_obj)
+                    else:
+                        continue
+            fused_list.append(obj)
+        return fused_list
+
+
     def callback_exploration(self, msg):
         if msg.data == True:
             object_list_msg = ObjectList()
             object_list_msg.header.frame_id = "/map"
+            certain_objects = []
             if self.object_list:
                 for obj in self.object_list:
-		    if obj[4] > 10:
-		            pose = PointStamped()
-		            pose.header.frame_id = "/map"
-		            pose.point.x = obj[2]
-		            pose.point.y = obj[3]
-		            object_list_msg.positions.append(pose)
-		            object_list_msg.id.append(obj[0])
-		            object_list_msg.object_class.append(obj[1])
-                self.known_objects_pub.publish(object_list_msg)
+		            if obj[4] > 10:
+                        certain_objects.append[obj]
+
+                certain_objects = fuse_objects(certain_objects)
+                rospy.loginf("Known objects that are published to the map:")
+                for obj in certain_objects:
+                    rospy.loginfo("Object with ID: "+str(object[0])+ " and class: " + self.result_msgs[object[1]][0] + " and votes: " +str(object[4]) + " at position: (" + str(object[2]) + ", "+str(object[3]) + ")")
+    	            pose = PointStamped()
+    	            pose.header.frame_id = "/map"
+    	            pose.point.x = obj[2]
+    	            pose.point.y = obj[3]
+    	            object_list_msg.positions.append(pose)
+    	            object_list_msg.id.append(obj[0])
+    	            object_list_msg.object_class.append(obj[1])
+                    self.known_objects_pub.publish(object_list_msg)
             else:
                 rospy.loginfo("No objects detected")
 
