@@ -104,11 +104,11 @@ class object_detection_node:
                     found = True
                     #rospy.loginfo(image)
 
-        for position in positions:
-            x,y,w,h,key = position
-            cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
-        cv2.imshow('display',image)
-        cv2.waitKey(1)
+        #for position in positions:
+        #    x,y,w,h,key = position
+        #    cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
+        #cv2.imshow('display',image)
+        #cv2.waitKey(1)
 
 
         bounding_image = image

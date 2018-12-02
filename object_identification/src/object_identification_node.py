@@ -46,7 +46,7 @@ class ObjectIdentificationNode:
 
         self.frame_skipper = 0
 
-        self.model = load_model('/home/ras16/networks/simple_network_14.h5')
+        self.model = load_model('/home/ras16/networks/simple_network_14_all.h5')
         self.model.summary()
         self.graph = tf.get_default_graph()
 
@@ -57,7 +57,7 @@ class ObjectIdentificationNode:
 
     def calculate_similarity(self, identification, obj_class):
         if identification == obj_class:
-            return 2, 2
+            return 3, 2
         elif self.result_msgs[identification][2] == self.result_msgs[obj_class][2]:
             return 0.5, 1
         else:
@@ -218,14 +218,17 @@ class ObjectIdentificationNode:
     def fuse_objects(self, object_list):
         fused_list = []
         # Sort list by votes
-        sorted_list = object_list.sort(key= lambda x: x[4], reverse = True)
+        sorted_list = list(object_list)
+        sorted_list.sort(key= lambda x: x[4], reverse = True)
+        print(object_list)
+        print(sorted_list)
         counter = 0
         for obj in sorted_list:
             #Calculate closest objects
             counter += 1
             for next_obj in sorted_list[counter:-1]:
                 distance = math.sqrt(pow((obj[2]-next_obj[2]), 2) + pow((obj[3] - next_obj[3]),2))
-                if distance <= 0.2:
+                if distance <= 0.4:
                     votes, same = self.calculate_similarity(obj[1], next_obj[1])
                     if same:
                         obj[2] = (obj[2] * obj[4] + next_obj[2] * next_obj[4]) / (obj[4] + next_obj[4]) #Average x position based on votes
@@ -239,6 +242,7 @@ class ObjectIdentificationNode:
 
     def callback_exploration(self, msg):
         if msg.data == True:
+            rospy.loginfo("EXPLORING DONE")
             object_list_msg = ObjectList()
             object_list_msg.header.frame_id = "/map"
             certain_objects = []
@@ -247,10 +251,10 @@ class ObjectIdentificationNode:
                     if obj[4] > 10:
                         certain_objects.append(obj)
 
-                certain_objects = fuse_objects(certain_objects)
-                rospy.loginf("Known objects that are published to the map:")
+                certain_objects = self.fuse_objects(certain_objects)
+                rospy.loginfo("Known objects that are published to the map:")
                 for obj in certain_objects:
-                    rospy.loginfo("Object with ID: "+str(object[0])+ " and class: " + self.result_msgs[object[1]][0] + " and votes: " +str(object[4]) + " at position: (" + str(object[2]) + ", "+str(object[3]) + ")")
+                    rospy.loginfo("Object with ID: "+str(obj[0])+ " and class: " + self.result_msgs[obj[1]][0] + " and votes: " +str(obj[4]) + " at position: (" + str(obj[2]) + ", "+str(obj[3]) + ")")
     	            pose = PointStamped()
     	            pose.header.frame_id = "/map"
     	            pose.point.x = obj[2]
@@ -258,9 +262,10 @@ class ObjectIdentificationNode:
     	            object_list_msg.positions.append(pose)
     	            object_list_msg.id.append(obj[0])
     	            object_list_msg.object_class.append(obj[1])
-                    self.known_objects_pub.publish(object_list_msg)
+                self.known_objects_pub.publish(object_list_msg)
             else:
                 rospy.loginfo("No objects detected")
+            self.object_list = certain_objects
 
 
 

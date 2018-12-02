@@ -22,11 +22,11 @@ public:
     DetectObstacleNode(){
         // constructor
         nh_ = ros::NodeHandle("~");
-        dist_from_floor_ = 0.025;
+        dist_from_floor_ = 0.015;
         range_ = 0.06;
         point_counter_ = 0;
-        point_threshold_ = 2000;
-        squared_radius_ = std::pow(0.21,2);
+        point_threshold_ = 750;
+        squared_radius_ = std::pow(0.23,2);
 
         avg_obstacle_x_ = 0.0;
         avg_obstacle_y_ = 0.0;
@@ -88,6 +88,9 @@ public:
                     if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
                         //Increment number of counter points in radius and update the average x position and y position
                         point_counter_++;
+                        if (point_counter_ >= point_threshold_){
+                          break;
+                        }
                         avg_obstacle_x_ += it->x;
                         avg_obstacle_y_ += it->y;
                         //Determine the span of the object in y direction
