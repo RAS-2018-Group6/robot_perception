@@ -22,11 +22,11 @@ public:
     DetectObstacleNode(){
         // constructor
         nh_ = ros::NodeHandle("~");
-        dist_from_floor_ = 0.015;
+        dist_from_floor_ = 0.01;
         range_ = 0.06;
         point_counter_ = 0;
         point_threshold_ = 750;
-        squared_radius_ = std::pow(0.23,2);
+        squared_radius_ = std::pow(0.21,2);
 
         avg_obstacle_x_ = 0.0;
         avg_obstacle_y_ = 0.0;
@@ -106,7 +106,7 @@ public:
                 }
             }
           }
-          //ROS_INFO("Pointcounter:%i",point_counter_);
+          ROS_INFO("Pointcounter:%i",point_counter_);
           //Check if enough point in radius were detected
           if(point_counter_ >= point_threshold_){
             //Publish obstacle_detected_ true
@@ -119,23 +119,23 @@ public:
                 point_pos_.header.frame_id = "/base_link";
                 point_pos_.point.x = min_x_;
                 point_pos_.point.y = min_y_;
-                ROS_INFO("Minimum Robot Coordinates:\nx: %f , y: %f",point_pos_.point.x,point_pos_.point.y);
+                //ROS_INFO("Minimum Robot Coordinates:\nx: %f , y: %f",point_pos_.point.x,point_pos_.point.y);
                 point_pos_.point.z = 0.0;
                 tf_listener_.transformPoint("/map",point_pos_,point_pos_map_);
                 point_pos_map_.point.z = 0.0;
                 obstacle_pos_.positions[0] = point_pos_map_;
-		            ROS_INFO("Minimum Map Coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
+		            //ROS_INFO("Minimum Map Coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
 
 
                 point_pos_.header.frame_id = "/base_link";
                 point_pos_.point.x = max_x_;
                 point_pos_.point.y = max_y_;
                 point_pos_.point.z = 0.0;
-                ROS_INFO("Maximum Robot Coordinates:\nx: %f , y: %f",point_pos_.point.x,point_pos_.point.y);
+                //ROS_INFO("Maximum Robot Coordinates:\nx: %f , y: %f",point_pos_.point.x,point_pos_.point.y);
                 tf_listener_.transformPoint("/map",point_pos_,point_pos_map_);
                 point_pos_map_.point.z = 0.0;
                 obstacle_pos_.positions[1] = point_pos_map_;
-		            ROS_INFO("Maximum Map Coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
+		            //ROS_INFO("Maximum Map Coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
 
 
                 avg_obstacle_x_ = avg_obstacle_x_/ ((float) point_counter_);
@@ -144,11 +144,11 @@ public:
                 point_pos_.point.x = avg_obstacle_x_;
                 point_pos_.point.y = avg_obstacle_y_;
                 point_pos_.point.z = 0.0;
-                ROS_INFO("Detected average robot coordinates\nx: %f , y: %f",point_pos_.point.x,point_pos_.point.y);
+                //ROS_INFO("Detected average robot coordinates\nx: %f , y: %f",point_pos_.point.x,point_pos_.point.y);
                 tf_listener_.transformPoint("/map",point_pos_,point_pos_map_);
                 point_pos_map_.point.z = 0.0;
                 obstacle_pos_.positions[2] = point_pos_map_;
-                ROS_INFO("Published average map coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
+                //ROS_INFO("Published average map coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
                 point_pos_pub_.publish(obstacle_pos_);
 
             }
