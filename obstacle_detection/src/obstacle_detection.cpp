@@ -76,6 +76,7 @@ public:
           //ROS_INFO("New Pointcloud");
           //Iterate over Pointcloud
           point_counter_ = 0;
+	  // Iterate through the pointcloud
           for(PointCloud::iterator it = transformed_pointcloud_.begin(); it != transformed_pointcloud_.end(); it++)
           {
             //Remove points with value NAN
@@ -83,9 +84,10 @@ public:
                 //Check only the point in the right height range: dist_from_floor_ -> dist_from_floor_ + range_
                 //ROS_INFO("Height:%f",it->z);
                 if(it->z >= dist_from_floor_ && it->z < dist_from_floor_ + range_){
+		  // Check if the point is immediately infront of the robot (y-direction)
                   if(std::abs(it->y)<=0.09){
                     //ROS_INFO("X: %f , Y: %f", it->x, it->y);
-                                  //Check if point is in stopping radius_
+                                  //Check if point is in stopping distance (radius_)
                                   if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
                                       //Increment number of counter points in radius and update the average x position and y position
                                       point_counter_++;
@@ -94,6 +96,7 @@ public:
                                       }
                                       avg_obstacle_x_ += it->x;
                                       avg_obstacle_y_ += it->y;
+					  
                                       //Determine the span of the object in y direction
                                       if (it->y <= min_y_){
                                           min_y_ = it->y;
@@ -110,7 +113,7 @@ public:
             }
           }
           ROS_INFO("Pointcounter:%i",point_counter_);
-          //Check if enough point in radius were detected
+          //Check if enough point in the stopping distance were detected
           if(point_counter_ >= point_threshold_){
             //Publish obstacle_detected_ true
             obstacle_detected_.data = true;
@@ -118,6 +121,8 @@ public:
             ROS_INFO("Obstacle detected with Perception");
             // Calculate AVG position of obstacle and publish
             if(point_counter_ != 0){
+		    
+		// Determine the most left detected coordinate position of the obstacle
 
                 point_pos_.header.frame_id = "/base_link";
                 point_pos_.point.x = min_x_;
@@ -130,6 +135,7 @@ public:
 		            //ROS_INFO("Minimum Map Coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
 
 
+		// Determine the most right detected coordinate position of the obstacle
                 point_pos_.header.frame_id = "/base_link";
                 point_pos_.point.x = max_x_;
                 point_pos_.point.y = max_y_;
@@ -139,7 +145,8 @@ public:
                 point_pos_map_.point.z = 0.0;
                 obstacle_pos_.positions[1] = point_pos_map_;
 		            //ROS_INFO("Maximum Map Coordinates:\nx: %f , y: %f",point_pos_map_.point.x,point_pos_map_.point.y);
-
+		    
+		 // Determine the average coordinate position of the obstacle
 
                 avg_obstacle_x_ = avg_obstacle_x_/ ((float) point_counter_);
                 avg_obstacle_y_ = avg_obstacle_y_/ ((float) point_counter_);
