@@ -83,26 +83,29 @@ public:
                 //Check only the point in the right height range: dist_from_floor_ -> dist_from_floor_ + range_
                 //ROS_INFO("Height:%f",it->z);
                 if(it->z >= dist_from_floor_ && it->z < dist_from_floor_ + range_){
-  		//ROS_INFO("X: %f , Y: %f", it->x, it->y);
-                    //Check if point is in stopping radius_
-                    if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
-                        //Increment number of counter points in radius and update the average x position and y position
-                        point_counter_++;
-                        if (point_counter_ >= point_threshold_){
-                          break;
-                        }
-                        avg_obstacle_x_ += it->x;
-                        avg_obstacle_y_ += it->y;
-                        //Determine the span of the object in y direction
-                        if (it->y <= min_y_){
-                            min_y_ = it->y;
-                            min_x_ = it->x;
-                        }
-                        if(it->y >= max_y_){
-                          max_y_ = it->y;
-                          max_x_ = it->x;
-                        }
-                    }
+                  if(std::abs(it->y)<=0.09){
+                    //ROS_INFO("X: %f , Y: %f", it->x, it->y);
+                                  //Check if point is in stopping radius_
+                                  if((std::pow(it->x,2)+std::pow(it->y,2))<squared_radius_){
+                                      //Increment number of counter points in radius and update the average x position and y position
+                                      point_counter_++;
+                                      if (point_counter_ >= point_threshold_){
+                                        break;
+                                      }
+                                      avg_obstacle_x_ += it->x;
+                                      avg_obstacle_y_ += it->y;
+                                      //Determine the span of the object in y direction
+                                      if (it->y <= min_y_){
+                                          min_y_ = it->y;
+                                          min_x_ = it->x;
+                                      }
+                                      if(it->y >= max_y_){
+                                        max_y_ = it->y;
+                                        max_x_ = it->x;
+                                      }
+                                  }
+                  }
+
                 }
             }
           }

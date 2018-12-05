@@ -145,7 +145,6 @@ class object_detection_node:
 
             except CvBridgeError as e:
                 print(e)
-
             # Calculate the 3D position
 
             if self.pc_bool:

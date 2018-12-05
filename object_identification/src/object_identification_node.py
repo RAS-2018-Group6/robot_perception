@@ -67,13 +67,14 @@ class ObjectIdentificationNode:
     #Position of the detected object: [x,y] in the map frame
     def manage_objects(self, identification, position, n_objects):
         if identification == 14:
-            return True, None
+            return True, None, -10
         # Check if class was determined at all
         # return False, None
         #print(self.object_list)
         #print(identification, position)
         known_object = False
         id = None
+        votes_obj = -10
         #rospy.loginfo(self.object_counter)
         close_objects = [] # Containing [ID, class_id, distance , votes]
         # Was an object seen before?
@@ -106,6 +107,7 @@ class ObjectIdentificationNode:
                     if not known_object and same == 2:
                         known_object = True
                         id = obj[0]
+                        votes_obj = obj[4]
                         self.object_list[idx][2] = (self.object_list[idx][2] + position[0]) / 2 #Average x position
                         self.object_list[idx][3] = (self.object_list[idx][3] + position[1]) / 2 #Average y position
                         self.object_list[idx][4] += votes #Change the votes the object has
@@ -142,7 +144,7 @@ class ObjectIdentificationNode:
 
 
 
-        return known_object, id
+        return known_object, id, votes_obj
 
     def evaluate_image(self,cv_image):
         result = None
@@ -196,7 +198,7 @@ class ObjectIdentificationNode:
                 if result is not None:
                     rospy.loginfo('Class: '+str(result)+'('+self.result_msgs[result][0]+')')
                     idf = None
-                    known_object, idf = self.manage_objects(result,[self.transform_msg.transform.translation.x, self.transform_msg.transform.translation.y],n_detected_objects)
+                    known_object, idf, votes_pub = self.manage_objects(result,[self.transform_msg.transform.translation.x, self.transform_msg.transform.translation.y],n_detected_objects)
                     if not known_object:
                         # Set the output string for the sound message and publish it.
                         self.sound_msg.data = self.result_msgs[result][1]
@@ -220,8 +222,8 @@ class ObjectIdentificationNode:
         # Sort list by votes
         sorted_list = list(object_list)
         sorted_list.sort(key= lambda x: x[4], reverse = True)
-        print(object_list)
-        print(sorted_list)
+        #print(object_list)
+        #print(sorted_list)
         counter = 0
         for obj in sorted_list:
             #Calculate closest objects
