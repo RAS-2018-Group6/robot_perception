@@ -14,7 +14,6 @@ from std_msgs.msg import Bool
 
 
 
-#Node to capture images from the camera and save them to the computer.
 
 class object_detection_node:
     def __init__(self):
@@ -47,10 +46,9 @@ class object_detection_node:
         img[:,:,2] = np.reshape(np_array[0::3],(height,width))
         return img
 
-
+   
+    # Function to scan an image received from the camera for objects 
     def scanImage(self,np_array):
-        ### TODO: Find way to extract position(Distance,Bearing) from Depth measurement
-        ### TODO: Use tf to display the object in roboter frame
         image = np_array
         found = False
         object_images = []
@@ -62,6 +60,7 @@ class object_detection_node:
         #rospy.loginfo(blurred_image)
         hsv = cv2.cvtColor(blurred_image,cv2.COLOR_BGR2HSV)
         positions = []
+        # Iterate over color hsv masks
         for key,value in self.upper.items():
             # Mask the image and use open/close to have smoother conturs
             kernel = np.ones((9,9),np.uint8)
@@ -97,13 +96,16 @@ class object_detection_node:
                     w = 639-x
 
                 if area >= 3500 and area <= 35000:
+                    # Append position of detected bounding boxes
                     positions.append([x,y,w,h,key])
+                    # Save the cutout image of the detected object
                     clipped_image = np.copy(image[y:y+h,x:x+w])
                     object_images.append(clipped_image)
 
                     found = True
                     #rospy.loginfo(image)
 
+        # Code for visualization
         #for position in positions:
         #    x,y,w,h,key = position
         #    cv2.rectangle(image,(x,y),(x+w,y+h),self.colors[key],2)
@@ -127,9 +129,7 @@ class object_detection_node:
 
 
         if found:
-            #detected = Bool()
-            #detected.data = True
-            #self.object_detected_pub.publish(detected)
+            # Publish the data of the detected object: bounding box image, and estimated position
             objects_msg = Objects()
             for image in object_images:
                 try:
@@ -157,6 +157,7 @@ class object_detection_node:
                     pose_3D = self.calculate3DPositions(position)
                     #rospy.loginfo(pose_3D)
                     if(pose_3D):
+                        # Transform detected object in to the map_fram
                         pose = PointStamped()
                         pose.header.frame_id = 'camera_link'
                         pose.point.x = pose_3D[2] #Robot X = Camera Z
@@ -189,6 +190,8 @@ class object_detection_node:
                 self.clipped_images_pub.publish(objects_msg)
                 rospy.loginfo('Published with no Position')
 
+    # Calculate the position of the detected object depending on the pixel coordinates of the object/ bounding box
+    # Average over several extracted pixels and the associated point_cloud data points
     def calculate3DPositions(self,position):
         pose_3D = []
         if self.pc_bool:
@@ -202,6 +205,7 @@ class object_detection_node:
             counter_x = 0
             counter_y = 0
             counter_z = 0
+            # Determine average position
             for point in pc2.read_points(self.point_cloud, skip_nans = True, uvs = uv):
                 if point[0] != 0:
                     pose_3D[0] += point[0]
